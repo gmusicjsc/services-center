@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Quản Lý Bảo Hành & Sửa Chữa - G.Music</title>
-    <!-- Favicon chuẩn từ ảnh logo vuông trên GitHub -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo-G.Music-2026-vuong.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -60,49 +60,45 @@
 
     <!-- Header / Navigation -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="h-10 flex items-center justify-center">
-                    <!-- Gọi trực tiếp file ảnh logo ngang đã upload -->
-                    <img src="logo-G.Music-2026.png" alt="G.Music Logo" class="h-9 w-auto object-contain">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
+                <div class="h-8 sm:h-10 flex items-center justify-center shrink-0">
+                    <img src="logo-G.Music-2026.png" alt="G.Music Logo" class="h-7 sm:h-9 w-auto object-contain">
                 </div>
-                <div>
-                    <h1 class="text-base font-bold text-slate-800 leading-tight">Quản Lý Bảo Hành & Sửa Chữa</h1>
-                    <p class="text-xs text-slate-500">G.Music Serrvices Center</p>
+                <div class="truncate">
+                    <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
+                    <p class="text-[10px] sm:text-xs text-slate-500 truncate">G.Music & Technical Center</p>
                 </div>
             </div>
-            <nav class="flex space-x-1 sm:space-x-2 items-center">
-                <button onclick="switchTab('list')" id="nav-list" class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-purple-50 text-purple-700">
-                    <i class="fa-solid fa-list-ul mr-1.5"></i> Danh sách (<span id="total-count">0</span>)
+            <nav class="flex items-center space-x-1">
+                <button onclick="switchTab('list')" id="nav-list" class="px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-purple-50 text-purple-700">
+                    <i class="fa-solid fa-list-ul sm:mr-1.5"></i> <span class="hidden md:inline">Danh sách</span> (<span id="total-count">0</span>)
                 </button>
-                <button onclick="switchTab('form')" id="nav-form" class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
-                    <i class="fa-solid fa-plus-circle mr-1.5"></i> Mục mới
+                <button onclick="switchTab('form')" id="nav-form" class="px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-plus-circle sm:mr-1.5"></i> <span class="hidden md:inline">Mục mới</span>
                 </button>
-                <button onclick="switchTab('import')" id="nav-import" class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
-                    <i class="fa-solid fa-file-excel mr-1.5"></i> Import MS List
+                <button onclick="switchTab('import')" id="nav-import" class="px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-file-excel sm:mr-1.5"></i> <span class="hidden md:inline">Import</span>
                 </button>
-                <button onclick="switchTab('report')" id="nav-report" class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
-                    <i class="fa-solid fa-chart-pie mr-1.5"></i> Báo cáo
-                </button>
-                <button onclick="openConfigModal()" class="ml-2 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Cấu hình Google Sheet API">
-                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Kết nối Sheet
+                <button onclick="switchTab('report')" id="nav-report" class="px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-chart-pie sm:mr-1.5"></i> <span class="hidden md:inline">Báo cáo</span>
                 </button>
             </nav>
         </div>
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-6 lg:p-8">
 
         <!-- TAB 1: DANH SÁCH -->
         <section id="tab-list" class="space-y-4">
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
                 <div class="flex flex-wrap gap-2 w-full md:w-auto flex-1">
-                    <div class="relative flex-1 min-w-[220px]">
+                    <div class="relative flex-1 min-w-[200px]">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" id="search-input" oninput="renderTable()" placeholder="Tìm kiếm theo số phiếu, serial, khách hàng..." class="custom-input pl-9">
+                        <input type="text" id="search-input" oninput="renderTable()" placeholder="Tìm số phiếu, serial, khách..." class="custom-input pl-9 text-xs sm:text-sm">
                     </div>
-                    <select id="filter-brand" onchange="renderTable()" class="custom-input w-auto">
+                    <select id="filter-brand" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
                         <option value="">Tất cả thương hiệu</option>
                         <option value="ALPHATHETA/PIONEERDJ">ALPHATHETA/PIONEERDJ</option>
                         <option value="B&C SPEAKERS">B&C SPEAKERS</option>
@@ -111,7 +107,7 @@
                         <option value="ANTARI">ANTARI</option>
                         <option value="P.AUDIO">P.AUDIO</option>
                     </select>
-                    <select id="filter-tech" onchange="renderTable()" class="custom-input w-auto">
+                    <select id="filter-tech" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
                         <option value="">Tất cả thợ sửa</option>
                         <option value="Anh Tú">Anh Tú</option>
                         <option value="Siêu">Siêu</option>
@@ -120,12 +116,12 @@
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto justify-end">
                     <button onclick="syncDataFromCloud()" id="sync-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-                        <i class="fa-solid fa-rotate"></i> Đồng bộ Mây
+                        <i class="fa-solid fa-rotate"></i> Đồng bộ
                     </button>
                     <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                         <i class="fa-solid fa-file-excel"></i> Xuất Excel
                     </button>
-                    <button onclick="openNewForm()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                    <button onclick="openNewForm()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                         <i class="fa-solid fa-plus"></i> Thêm mới
                     </button>
                 </div>
@@ -133,7 +129,7 @@
 
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                                 <th class="p-3.5 sortable-th" onclick="sortData('ticketNumber')">
@@ -169,7 +165,7 @@
 
         <!-- TAB 2: FORM NHẬP MỚI / CHỈNH SỬA -->
         <section id="tab-form" class="hidden space-y-4">
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
                     <div>
                         <h2 id="form-title" class="text-base font-bold text-slate-800">Thêm Mục Bảo Hành Mới</h2>
@@ -298,7 +294,7 @@
 
         <!-- TAB 3: IMPORT MS LIST / EXCEL -->
         <section id="tab-import" class="hidden space-y-4">
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
                 <div>
                     <h2 class="text-base font-bold text-slate-800">Nhập dữ liệu từ file Excel / MS List</h2>
                     <p class="text-xs text-slate-500 mt-0.5">Tải file Excel gốc từ Microsoft List để đồng bộ toàn bộ dữ liệu vào hệ thống.</p>
@@ -333,38 +329,38 @@
         <!-- TAB 4: BÁO CÁO -->
         <section id="tab-report" class="hidden space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-slate-500 uppercase">Tổng số ca bảo hành</p>
-                        <h3 id="rep-total-cases" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                        <h3 id="rep-total-cases" class="text-xl sm:text-2xl font-bold text-slate-800 mt-1">0</h3>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-clipboard-list"></i></div>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-slate-500 uppercase">Đã trả khách</p>
-                        <h3 id="rep-done-cases" class="text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                        <h3 id="rep-done-cases" class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0</h3>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-circle-check"></i></div>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-slate-500 uppercase">Đang xử lý / Mới</p>
-                        <h3 id="rep-pending-cases" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                        <h3 id="rep-pending-cases" class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">0</h3>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-slate-500 uppercase">Doanh thu (Đã trả khách)</p>
-                        <h3 id="rep-total-revenue" class="text-xl font-bold text-blue-600 mt-1">0 đ</h3>
+                        <h3 id="rep-total-revenue" class="text-lg sm:text-xl font-bold text-blue-600 mt-1">0 đ</h3>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-sack-dollar"></i></div>
                 </div>
             </div>
 
             <!-- Biểu đồ & Xuất báo cáo theo tháng -->
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-chart-column text-purple-600"></i> Thống kê theo Tháng (Số ca & Doanh thu)</h3>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -389,7 +385,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-user-gear text-purple-600"></i> Thống kê theo Kỹ thuật viên (Thợ)</h3>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-xs">
@@ -405,7 +401,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-tags text-purple-600"></i> Thống kê theo Thương hiệu (Brand)</h3>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-xs">
@@ -423,7 +419,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-600"></i> Thống kê theo Tình trạng</h3>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-xs">
@@ -438,7 +434,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Thống kê theo Khách hàng</h3>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-xs">
@@ -454,7 +450,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-box-archive text-purple-600"></i> Thống kê theo Hàng hóa</h3>
                     <div class="overflow-x-auto max-h-64">
                         <table class="w-full text-left text-xs">
@@ -471,27 +467,6 @@
             </div>
         </section>
     </main>
-
-    <!-- Modal Cấu Hình Google Sheet API URL -->
-    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 class="text-base font-bold text-slate-800">Cấu hình Google Sheets API</h3>
-                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <p class="text-slate-600 leading-relaxed">Nhập Web App URL từ Google Apps Script của bạn để đồng bộ dữ liệu trực tuyến hai chiều:</p>
-                <div>
-                    <label class="field-label">Google Apps Script Web App URL</label>
-                    <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="custom-input">
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Hủy</button>
-                <button onclick="saveApiUrl()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold">Lưu & Kết nối</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Chi Tiết -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -518,9 +493,10 @@
 
     <script>
         let warrantyList = [];
-        let currentSortCol = '';
-        let currentSortAsc = true;
-        let googleScriptUrl = localStorage.getItem('gmusic_sheets_api_url') || '';
+        let currentSortCol = 'dateReceived'; // Mặc định sắp xếp theo ngày nhận
+        let currentSortAsc = false;          // Sắp xếp giảm dần (mới nhất lên trên)
+        
+        let googleScriptUrl = "https://script.google.com/macros/s/AKfycbxWvikxUdCY42MvXPsGyMIWXsNlZ_i0-8csHUpLfEIGO_zJr50iYTJx0JJfGJ7vPhGFlg/exec";
 
         function cleanAndFormatDate(val) {
             if (!val) return "";
@@ -576,14 +552,12 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v20');
+            const saved = localStorage.getItem('warranty_records_gmusic_v23');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
             
-            if (googleScriptUrl) {
-                syncDataFromCloud(true);
-            }
+            syncDataFromCloud(true);
 
             const now = new Date();
             const yyyy = now.getFullYear();
@@ -605,24 +579,14 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v20', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v23', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
-            if (googleScriptUrl) {
-                pushDataToCloud();
-            }
+            pushDataToCloud();
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!googleScriptUrl) {
-                if (!isSilent) {
-                    showToast('Chưa cấu hình Google Sheet URL! Bấm vào "Kết nối Sheet" để thiết lập.', true);
-                    openConfigModal();
-                }
-                return;
-            }
-
-            if (!isSilent) showToast('Đang đồng bộ dữ liệu từ đám mây...');
+            if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 const data = await response.json();
@@ -645,19 +609,18 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v20', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v23', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Đồng bộ dữ liệu thành công!');
                 }
             } catch (err) {
                 console.error(err);
-                if (!isSilent) showToast('Lỗi kết nối Google Sheet!', true);
+                if (!isSilent) showToast('Lỗi tải dữ liệu từ Google Sheet!', true);
             }
         }
 
         async function pushDataToCloud() {
-            if (!googleScriptUrl) return;
             try {
                 const payload = warrantyList.map((i, idx) => ({
                     "id": i.id,
@@ -689,31 +652,15 @@
             }
         }
 
-        function openConfigModal() {
-            document.getElementById('api-url-input').value = googleScriptUrl;
-            document.getElementById('config-modal').classList.remove('hidden');
-        }
-        function closeConfigModal() {
-            document.getElementById('config-modal').classList.add('hidden');
-        }
-        function saveApiUrl() {
-            const val = document.getElementById('api-url-input').value.trim();
-            googleScriptUrl = val;
-            localStorage.setItem('gmusic_sheets_api_url', val);
-            closeConfigModal();
-            showToast('Đã lưu cấu hình API!');
-            syncDataFromCloud();
-        }
-
         function switchTab(tabId) {
             ['list', 'form', 'import', 'report'].forEach(id => {
                 document.getElementById(`tab-${id}`).classList.add('hidden');
                 const btn = document.getElementById(`nav-${id}`);
-                if (btn) btn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100";
+                if (btn) btn.className = "px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-600 hover:bg-slate-100";
             });
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`nav-${tabId}`);
-            if (activeBtn) activeBtn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-purple-50 text-purple-700";
+            if (activeBtn) activeBtn.className = "px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all bg-purple-50 text-purple-700";
         }
 
         function showToast(msg, isErr = false) {
@@ -804,7 +751,7 @@
 
         function resetDataAndReload() {
             if (confirm('Xóa sạch toàn bộ dữ liệu hiện tại?')) {
-                localStorage.removeItem('warranty_records_gmusic_v20');
+                localStorage.removeItem('warranty_records_gmusic_v23');
                 warrantyList = [];
                 saveToStorage();
                 showToast('Đã làm sạch dữ liệu!');
@@ -850,18 +797,17 @@
                 return matchSearch && matchBrand && matchTech;
             });
 
-            if (currentSortCol) {
-                filtered.sort((a, b) => {
-                    let valA = a[currentSortCol] || '';
-                    let valB = b[currentSortCol] || '';
-                    if (typeof valA === 'string') valA = valA.toLowerCase();
-                    if (typeof valB === 'string') valB = valB.toLowerCase();
+            // Sắp xếp mặc định hoặc theo cột người dùng bấm
+            filtered.sort((a, b) => {
+                let valA = a[currentSortCol] || '';
+                let valB = b[currentSortCol] || '';
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
 
-                    if (valA < valB) return currentSortAsc ? -1 : 1;
-                    if (valA > valB) return currentSortAsc ? 1 : -1;
-                    return 0;
-                });
-            }
+                if (valA < valB) return currentSortAsc ? -1 : 1;
+                if (valA > valB) return currentSortAsc ? 1 : -1;
+                return 0;
+            });
 
             document.getElementById('total-count').innerText = warrantyList.length;
 
