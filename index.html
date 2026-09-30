@@ -552,7 +552,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v37');
+            const saved = localStorage.getItem('warranty_records_gmusic_v38');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -579,7 +579,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v37', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
             pushDataToCloud();
@@ -609,7 +609,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v37', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Đồng bộ dữ liệu thành công!');
@@ -620,8 +620,8 @@
             }
         }
 
-        // BỎ HẲN FETCH/BEACON, CHUYỂN SANG DÙNG THẺ FORM ẨN POST ĐỂ LÁCH MỌI LỖI CORS 100%
-        function pushDataToCloud() {
+        // CHUYỂN SANG DÙNG CƠ CHẾ GỬI DỮ LIỆU QUA THAM SỐ URL GET (LÁCH MỌI LỖI CORS VÀ CHẶN POST 100%)
+        async function pushDataToCloud() {
             try {
                 const payload = warrantyList.map((i, idx) => ({
                     "id": i.id,
@@ -642,29 +642,12 @@
                     "Tình trạng": i.status
                 }));
 
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = googleScriptUrl;
-                form.target = 'hidden_iframe_sync';
+                const jsonStr = encodeURIComponent(JSON.stringify(payload));
+                const targetUrl = `${googleScriptUrl}?action=save&data=${jsonStr}`;
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'json';
-                input.value = JSON.stringify(payload);
-                form.appendChild(input);
-
-                let iframe = document.getElementById('hidden_iframe_sync');
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.name = 'hidden_iframe_sync';
-                    iframe.id = 'hidden_iframe_sync';
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
-                }
-
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
+                // Gửi yêu cầu GET ngầm để cập nhật dữ liệu lên Google Sheet ngay lập tức
+                await fetch(targetUrl, { mode: 'no-cors' });
+                showToast('Đã đồng bộ thay đổi lên Google Sheet!');
             } catch (err) {
                 console.error('Lỗi khi đẩy dữ liệu lên mây:', err);
             }
@@ -778,7 +761,7 @@
         function deleteRecord(id) {
             if (confirm('Bạn có chắc muốn xóa mục này không?')) {
                 warrantyList = warrantyList.filter(i => i.id !== id);
-                localStorage.setItem('warranty_records_gmusic_v37', JSON.stringify(warrantyList));
+                localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
                 renderTable();
                 updateStats();
                 pushDataToCloud();
