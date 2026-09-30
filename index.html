@@ -493,8 +493,8 @@
 
     <script>
         let warrantyList = [];
-        let currentSortCol = 'ticketNumber'; // Sắp xếp mặc định theo số phiếu mới nhất lên trên
-        let currentSortAsc = false;         // Giảm dần (mới nhất/số lớn nhất ở trên)
+        let currentSortCol = 'ticketNumber'; // Mặc định sắp xếp theo số phiếu
+        let currentSortAsc = false;         // Giảm dần (số phiếu lớn nhất/mới nhất lên trên)
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
@@ -552,7 +552,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v26');
+            const saved = localStorage.getItem('warranty_records_gmusic_v27');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -579,7 +579,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v26', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v27', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
             pushDataToCloud();
@@ -609,7 +609,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v26', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v27', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Đồng bộ dữ liệu thành công!');
@@ -671,39 +671,26 @@
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // Tự động quét số phiếu lớn nhất hiện có và tăng lên 1
+        // Chỉ quét các số phiếu hợp lệ dạng BH-2026-XXXX để tìm số thứ tự lớn nhất thực tế và tăng lên 1
         function generateTicketCode() {
             const currentYear = new Date().getFullYear();
             let maxSeq = 0;
 
             warrantyList.forEach(item => {
-                const tNum = String(item.ticketNumber || '');
-                if (tNum.includes(`BH-${currentYear}-`)) {
-                    const parts = tNum.split('-');
-                    if (parts.length >= 3) {
-                        const seq = parseInt(parts[parts.length - 1], 10);
-                        if (!isNaN(seq) && seq > maxSeq) {
-                            maxSeq = seq;
-                        }
+                const tNum = String(item.ticketNumber || '').trim();
+                // Chỉ xét các mã bắt đầu chuẩn BH-2026-
+                if (tNum.startsWith(`BH-${currentYear}-`)) {
+                    const seqStr = tNum.replace(`BH-${currentYear}-`, '');
+                    const seq = parseInt(seqStr, 10);
+                    // Chỉ lấy các số thứ tự hợp lệ dưới 5000 để tránh bị dính mã lỗi sinh ngẫu nhiên lớn
+                    if (!isNaN(seq) && seq < 5000 && seq > maxSeq) {
+                        maxSeq = seq;
                     }
                 }
             });
 
-            if (maxSeq === 0 && warrantyList.length > 0) {
-                warrantyList.forEach(item => {
-                    const tNum = String(item.ticketNumber || '');
-                    const match = tNum.match(/(\d+)$/);
-                    if (match) {
-                        const seq = parseInt(match[1], 10);
-                        if (!isNaN(seq) && seq > maxSeq) {
-                            maxSeq = seq;
-                        }
-                    }
-                });
-            }
-
             const nextSeq = maxSeq + 1;
-            const paddedSeq = String(nextSeq).padStart(4, '0');
+            const paddedSeq = String(nextSeq).padStart(4, '0'); // Định dạng 4 chữ số (ví dụ: 0067)
             document.getElementById('ticketNumber').value = `BH-${currentYear}-${paddedSeq}`;
         }
 
@@ -783,7 +770,7 @@
 
         function resetDataAndReload() {
             if (confirm('Xóa sạch toàn bộ dữ liệu hiện tại?')) {
-                localStorage.removeItem('warranty_records_gmusic_v26');
+                localStorage.removeItem('warranty_records_gmusic_v27');
                 warrantyList = [];
                 saveToStorage();
                 showToast('Đã làm sạch dữ liệu!');
@@ -833,7 +820,6 @@
                 let valA = a[currentSortCol] || '';
                 let valB = b[currentSortCol] || '';
                 
-                // Nếu sắp xếp theo số phiếu, ưu tiên tách số để so sánh chính xác theo thứ tự lớn -> nhỏ
                 if (currentSortCol === 'ticketNumber') {
                     const numA = parseInt(String(valA).replace(/\D/g, ''), 10) || 0;
                     const numB = parseInt(String(valB).replace(/\D/g, ''), 10) || 0;
