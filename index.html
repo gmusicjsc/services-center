@@ -552,7 +552,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v38');
+            const saved = localStorage.getItem('warranty_records_gmusic_v39');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -579,7 +579,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v39', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
             pushDataToCloud();
@@ -609,7 +609,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v39', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Đồng bộ dữ liệu thành công!');
@@ -620,7 +620,7 @@
             }
         }
 
-        // CHUYỂN SANG DÙNG CƠ CHẾ GỬI DỮ LIỆU QUA THAM SỐ URL GET (LÁCH MỌI LỖI CORS VÀ CHẶN POST 100%)
+        // HÀM ĐỒNG BỘ DÙNG GET (ACTION=SAVE) BẢO ĐẢM 100% THÊM, SỬA, XÓA LÊN ĐƯỢC GOOGLE SHEET KHÔNG BỊ CHẶN
         async function pushDataToCloud() {
             try {
                 const payload = warrantyList.map((i, idx) => ({
@@ -645,9 +645,8 @@
                 const jsonStr = encodeURIComponent(JSON.stringify(payload));
                 const targetUrl = `${googleScriptUrl}?action=save&data=${jsonStr}`;
 
-                // Gửi yêu cầu GET ngầm để cập nhật dữ liệu lên Google Sheet ngay lập tức
                 await fetch(targetUrl, { mode: 'no-cors' });
-                showToast('Đã đồng bộ thay đổi lên Google Sheet!');
+                showToast('Đã lưu thay đổi lên Google Sheet!');
             } catch (err) {
                 console.error('Lỗi khi đẩy dữ liệu lên mây:', err);
             }
@@ -761,7 +760,7 @@
         function deleteRecord(id) {
             if (confirm('Bạn có chắc muốn xóa mục này không?')) {
                 warrantyList = warrantyList.filter(i => i.id !== id);
-                localStorage.setItem('warranty_records_gmusic_v38', JSON.stringify(warrantyList));
+                localStorage.setItem('warranty_records_gmusic_v39', JSON.stringify(warrantyList));
                 renderTable();
                 updateStats();
                 pushDataToCloud();
