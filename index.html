@@ -493,8 +493,8 @@
 
     <script>
         let warrantyList = [];
-        let currentSortCol = 'ticketNumber'; // Mặc định sắp xếp theo số phiếu
-        let currentSortAsc = false;         // Giảm dần (số phiếu lớn nhất/mới nhất lên trên)
+        let currentSortCol = 'ticketNumber';
+        let currentSortAsc = false;
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
@@ -552,7 +552,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v28');
+            const saved = localStorage.getItem('warranty_records_gmusic_v30');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -579,7 +579,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v28', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v30', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
             pushDataToCloud();
@@ -609,7 +609,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v28', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v30', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Đồng bộ dữ liệu thành công!');
@@ -620,7 +620,8 @@
             }
         }
 
-        async function pushDataToCloud() {
+        // Dùng Hidden Form để gửi dữ liệu cập nhật/xóa thẳng lên Google Sheet không bị chặn CORS
+        function pushDataToCloud() {
             try {
                 const payload = warrantyList.map((i, idx) => ({
                     "id": i.id,
@@ -641,12 +642,29 @@
                     "Tình trạng": i.status
                 }));
 
-                await fetch(googleScriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = googleScriptUrl;
+                form.target = 'hidden_iframe';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'json';
+                input.value = JSON.stringify(payload);
+                form.appendChild(input);
+
+                let iframe = document.getElementById('hidden_iframe');
+                if (!iframe) {
+                    iframe = document.createElement('iframe');
+                    iframe.name = 'hidden_iframe';
+                    iframe.id = 'hidden_iframe';
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
             } catch (err) {
                 console.error('Lỗi khi đẩy dữ liệu lên mây:', err);
             }
@@ -671,7 +689,6 @@
             setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // Tự động quét số phiếu chuẩn BH-2026-XXXX để tìm số lớn nhất và tăng lên 1
         function generateTicketCode() {
             const currentYear = new Date().getFullYear();
             let maxSeq = 0;
@@ -758,14 +775,14 @@
             switchTab('list');
         }
 
-        // Cập nhật hàm xóa: Xóa xong đồng thời đẩy dữ liệu mới lên Google Sheet ngay lập tức
+        // Hàm xóa trực tiếp và cập nhật mảng trên Google Sheet ngay lập tức
         function deleteRecord(id) {
             if (confirm('Bạn có chắc muốn xóa mục này không?')) {
                 warrantyList = warrantyList.filter(i => i.id !== id);
-                localStorage.setItem('warranty_records_gmusic_v28', JSON.stringify(warrantyList));
+                localStorage.setItem('warranty_records_gmusic_v30', JSON.stringify(warrantyList));
                 renderTable();
                 updateStats();
-                pushDataToCloud(); // Đồng bộ xóa lên mây vĩnh viễn
+                pushDataToCloud(); // Gửi lệnh xóa lên Google Sheet
                 showToast('Đã xóa thành công!');
             }
         }
