@@ -419,6 +419,41 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bổ sung lại: Thống kê theo Khách hàng và Hàng hóa -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Thống kê theo Khách hàng</h3>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 sticky top-0">
+                                <tr class="text-slate-600 border-b border-slate-200">
+                                    <th class="p-2.5">Tên khách hàng</th>
+                                    <th class="p-2.5 text-center">Số ca</th>
+                                    <th class="p-2.5 text-right">Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-customer-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-box-archive text-purple-600"></i> Thống kê theo Hàng hóa (Thiết bị)</h3>
+                    <div class="overflow-x-auto max-h-64">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 sticky top-0">
+                                <tr class="text-slate-600 border-b border-slate-200">
+                                    <th class="p-2.5">Tên hàng hóa</th>
+                                    <th class="p-2.5 text-center">Số ca</th>
+                                    <th class="p-2.5 text-right">Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-item-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -455,17 +490,23 @@
         // LẤY NGUYÊN VĂN CHUỖI TỪ SHEET KHÔNG QUA BẤT KỲ XỬ LÝ NÀO
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            return String(val).trim();
+            let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
+            return str;
         }
 
         function parseDateToDisplay(val) {
             if (!val) return "—";
-            return String(val).trim(); // Hiện y chang chuỗi nguyên bản DD/MM/YYYY từ Sheet
+            let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
+            return str; // Hiện y chang chuỗi nguyên bản DD/MM/YYYY từ Sheet
         }
 
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
+            
             // Nếu từ Sheet về dạng DD/MM/YYYY, chuyển thành YYYY-MM-DD để ô input type="date" trong form đọc được
             if (str.includes('/')) {
                 const parts = str.split('/');
@@ -1000,7 +1041,6 @@
             warrantyList.forEach(i => {
                 let raw = cleanAndFormatDate(i.dateReceived);
                 if (!raw) return;
-                // Trích xuất tháng từ chuỗi DD/MM/YYYY hoặc YYYY-MM-DD
                 let mKey = "";
                 if (raw.includes('/')) {
                     const p = raw.split('/');
@@ -1073,6 +1113,52 @@
                 `;
             }
             document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+
+            // Thống kê theo Khách hàng
+            const customerMap = {};
+            warrantyList.forEach(i => {
+                const cName = i.customerName || 'Khách lẻ';
+                if (!customerMap[cName]) customerMap[cName] = { count: 0, rev: 0 };
+                customerMap[cName].count++;
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    customerMap[cName].rev += Number(i.customerFee) || 0;
+                }
+            });
+            let customerHtml = '';
+            for (let [cName, data] of Object.entries(customerMap)) {
+                customerHtml += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 font-medium text-slate-800">${cName}</td>
+                        <td class="p-2.5 text-center font-bold text-purple-600">${data.count}</td>
+                        <td class="p-2.5 text-right font-semibold text-blue-600">${data.rev.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `;
+            }
+            document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+
+            // Thống kê theo Hàng hóa
+            const itemMap = {};
+            warrantyList.forEach(i => {
+                const itName = i.itemName || 'Thiết bị';
+                if (!itemMap[itName]) itemMap[itName] = { count: 0, rev: 0 };
+                itemMap[itName].count++;
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    itemMap[itName].rev += Number(i.customerFee) || 0;
+                }
+            });
+            let itemHtml = '';
+            for (let [itName, data] of Object.entries(itemMap)) {
+                itemHtml += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 font-medium text-slate-800">${itName}</td>
+                        <td class="p-2.5 text-center font-bold text-purple-600">${data.count}</td>
+                        <td class="p-2.5 text-right font-semibold text-blue-600">${data.rev.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `;
+            }
+            document.getElementById('report-item-body').innerHTML = itemHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
         }
     </script>
 </body>
