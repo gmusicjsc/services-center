@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v48</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v49</span>
                     </p>
                 </div>
             </div>
@@ -518,17 +518,20 @@
 
         function cleanAndFormatDate(val) {
             if (!val) return "";
+            
+            // Nếu là đối tượng Date từ Google Sheet / Excel trả về
             if (val instanceof Date) {
                 if (!isNaN(val.getTime())) {
-                    const y = val.getUTCFullYear();
-                    const m = String(val.getUTCMonth() + 1).padStart(2, '0');
-                    const d = String(val.getUTCDate()).padStart(2, '0');
+                    const y = val.getFullYear();
+                    const m = String(val.getMonth() + 1).padStart(2, '0');
+                    const d = String(val.getDate()).padStart(2, '0');
                     return `${y}-${m}-${d}`;
                 }
             }
+            
             let str = String(val).trim();
             
-            // Xử lý nếu chuỗi trả về dạng ISO / DateTime
+            // Nếu có chữ T (dạng ISO chuẩn UTC), cắt bỏ phần giờ phút phía sau để lấy đúng ngày gốc
             if (str.includes('T')) {
                 str = str.split('T')[0];
             }
@@ -545,12 +548,12 @@
                 }
             }
             
-            // Nếu chuỗi ở định dạng YYYY-MM-DD
+            // Nếu chuỗi đã ở định dạng YYYY-MM-DD thì trả về nguyên bản, cấm tuyệt đối quy đổi múi giờ
             if (str.includes('-') && str.length >= 10) {
                 return str.substring(0, 10);
             }
             
-            // Xử lý Serial Number ngày của Excel
+            // Xử lý Serial Number ngày của Excel (số đếm ngày)
             if (!isNaN(str) && Number(str) > 30000 && Number(str) < 60000) {
                 const d = new Date(Math.round((Number(str) - (25567 + 2)) * 86400 * 1000));
                 if (!isNaN(d.getTime())) {
@@ -560,6 +563,7 @@
                     return `${y}-${m}-${day}`;
                 }
             }
+            
             return str.substring(0, 10);
         }
 
