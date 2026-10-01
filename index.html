@@ -487,16 +487,22 @@
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
         // Tự động clear localStorage cũ để ép nhận dữ liệu chuẩn
-        if (!localStorage.getItem('gmusic_cleared_v56_fixdate')) {
+        if (!localStorage.getItem('gmusic_cleared_v56_fix_utc')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v56_fixdate', 'true');
+            localStorage.setItem('gmusic_cleared_v56_fix_utc', 'true');
         }
 
-        // XỬ LÝ BÙ TRỪ NGÀY THÁNG ĐỂ KHẮC PHỤC LỆCH 1 NGÀY
+        // HÀM XỬ LÝ TRIỆT ĐỂ CHUỖI UTC TỪ APPS SCRIPT
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
             
+            // Nếu có chữ T (chuỗi ISO UTC từ Google Apps Script), cắt phần trước chữ T
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
+            
+            // Nếu là dạng YYYY-MM-DD, tiến hành cộng bù 1 ngày để chống lệch múi giờ
             if (str.includes('-') && str.length >= 10) {
                 const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
@@ -505,7 +511,7 @@
                     let d = parseInt(parts[2], 10);
                     
                     const dateObj = new Date(Date.UTC(y, m, d));
-                    dateObj.setUTCDate(dateObj.getUTCDate() + 1); // Cộng bù đúng 1 ngày
+                    dateObj.setUTCDate(dateObj.getUTCDate() + 1); // Bù đúng 1 ngày
                     
                     const finalY = dateObj.getUTCFullYear();
                     const finalM = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
@@ -517,7 +523,7 @@
             return str;
         }
 
-        // Hiển thị ra bảng định dạng DD/MM/YYYY chuẩn
+        // Hiển thị ra bảng định dạng DD/MM/YYYY chuẩn Việt Nam
         function parseDateToDisplay(val) {
             if (!val) return "—";
             let cleaned = cleanAndFormatDate(val);
