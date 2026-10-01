@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v49</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v50</span>
                     </p>
                 </div>
             </div>
@@ -300,7 +300,7 @@
             </div>
         </section>
 
-        <!-- TAB 3: IMPORT MS LIST / EXCEL -->
+        <!-- TAB 3: IMPORT -->
         <section id="tab-import" class="hidden space-y-4">
             <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
                 <div>
@@ -314,7 +314,7 @@
                         <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl shadow-inner">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                         </div>
-                        <span class="text-sm font-semibold text-slate-700">Click để chọn file Excel / MS List (.xlsx, .xls)</span>
+                        <span class="text-sm font-semibold text-slate-700">Click để chọn file Excel (.xlsx, .xls)</span>
                     </label>
                 </div>
             </div>
@@ -452,13 +452,13 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Xử lý ngày tháng THỜI GIAN THỰC: Nhận nguyên văn DD/MM/YYYY từ Sheet, không suy diễn múi giờ
+        // Xử lý ngày tháng THỜI GIAN THỰC: Nhận nguyên văn DD/MM/YYYY từ Sheet
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
             if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu từ Sheet dạng DD/MM/YYYY, đổi sang YYYY-MM-DD cho ô input type="date" đọc chính xác
+            // Nếu Sheet trả về DD/MM/YYYY thì đổi thành YYYY-MM-DD để thẻ <input type="date"> đọc đúng
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -477,7 +477,7 @@
             let str = String(val).trim();
             if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu là dạng YYYY-MM-DD thì đổi ngược lại thành DD/MM/YYYY hiển thị lên bảng
+            // Nếu là YYYY-MM-DD thì đổi ngược lại thành DD/MM/YYYY hiển thị lên bảng
             if (str.includes('-') && str.length >= 10) {
                 const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
@@ -493,7 +493,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v49');
+            const saved = localStorage.getItem('warranty_records_gmusic_v50');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -520,21 +520,17 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v49', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v50', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
-        // TẢI DỮ LIỆU DÙNG JSONP BẢO ĐẢM KHÔNG BAO GIỜ LỖI TẢI
-        function syncDataFromCloud(isSilent = false) {
+        // TẢI DỮ LIỆU TỪ GOOGLE SHEET AN TOÀN TUYỆT ĐỐI KHÔNG BAO GIỜ LỖI
+        async function syncDataFromCloud(isSilent = false) {
             if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
-            
-            const callbackName = 'jsonp_load_cb_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                const scriptEl = document.getElementById('jsonp_load_script');
-                if (scriptEl) scriptEl.remove();
-
+            try {
+                const response = await fetch(googleScriptUrl);
+                const data = await response.json();
                 if (Array.isArray(data) && data.length > 0) {
                     warrantyList = data.map(i => ({
                         id: i['id'] || Date.now().toString() + Math.random(),
@@ -554,66 +550,50 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v49', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v50', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
-                    if (!isSilent) showToast('Tải dữ liệu thành công!');
+                    if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
                 }
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp_load_script';
-            script.src = `${googleScriptUrl}?callback=${callbackName}`;
-            script.onerror = function() {
-                if (!isSilent) showToast('Lỗi tải dữ liệu từ Google Sheet!', true);
-            };
-            document.body.appendChild(script);
+            } catch (err) {
+                console.error(err);
+                if (!isSilent) showToast('Lỗi tải dữ liệu!', true);
+            }
         }
 
-        function manualSyncToCloud() {
+        async function manualSyncToCloud() {
             showToast('Đang lưu dữ liệu lên Google Sheet...');
-            
-            const payload = warrantyList.map((i, idx) => ({
-                "id": i.id,
-                "Số phiếu BH": i.ticketNumber,
-                "Số serial": i.serialNumber,
-                "Tên khách hàng": i.customerName,
-                "Tên hàng hóa": i.itemName,
-                "Thương hiệu": i.brand,
-                "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
-                "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
-                "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
-                "Mô tả lỗi": i.errorDesc,
-                "Nội dung xử lý": i.repairProcess,
-                "Người sửa": i.tech,
-                "Phí anh Tú báo": i.techFee,
-                "Phí báo khách": i.customerFee,
-                "Linh kiện thay thế": i.spareParts,
-                "Tình trạng": i.status
-            }));
+            try {
+                const payload = warrantyList.map((i, idx) => ({
+                    "id": i.id,
+                    "Số phiếu BH": i.ticketNumber,
+                    "Số serial": i.serialNumber,
+                    "Tên khách hàng": i.customerName,
+                    "Tên hàng hóa": i.itemName,
+                    "Thương hiệu": i.brand,
+                    "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
+                    "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
+                    "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
+                    "Mô tả lỗi": i.errorDesc,
+                    "Nội dung xử lý": i.repairProcess,
+                    "Người sửa": i.tech,
+                    "Phí anh Tú báo": i.techFee,
+                    "Phí báo khách": i.customerFee,
+                    "Linh kiện thay thế": i.spareParts,
+                    "Tình trạng": i.status
+                }));
 
-            const jsonStr = encodeURIComponent(JSON.stringify(payload));
-            const callbackName = 'jsonp_save_cb_' + Math.round(100000 * Math.random());
-            
-            window[callbackName] = function(res) {
-                delete window[callbackName];
-                const scriptEl = document.getElementById('jsonp_save_script');
-                if (scriptEl) scriptEl.remove();
-                
-                if (res && res.result === 'success') {
-                    showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
-                } else {
-                    showToast('Có lỗi khi lưu lên Google Sheet!', true);
-                }
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp_save_script';
-            script.src = `${googleScriptUrl}?action=save&data=${jsonStr}&callback=${callbackName}`;
-            script.onerror = function() {
-                showToast('Lỗi kết nối tới Google Sheet!', true);
-            };
-            document.body.appendChild(script);
+                await fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi lưu lên Google Sheet!', true);
+            }
         }
 
         function switchTab(tabId) {
