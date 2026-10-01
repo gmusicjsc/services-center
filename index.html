@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v45</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v46</span>
                     </p>
                 </div>
             </div>
@@ -342,13 +342,22 @@
                     </div>
                     <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-clipboard-list"></i></div>
                 </div>
-                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">Đã trả khách</p>
-                        <h3 id="rep-done-cases" class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                
+                <!-- Thẻ Đã trả khách có chia dòng nhỏ Bảo hành / Sửa chữa -->
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Đã trả khách</p>
+                            <h3 id="rep-done-cases" class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-circle-check"></i></div>
                     </div>
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-medium">
+                        <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded" title="Đã trả & Không có phí khách">Bảo hành: <b id="rep-warranty-cases">0</b></span>
+                        <span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded" title="Đã trả & Có phí khách">Sửa chữa: <b id="rep-repair-cases">0</b></span>
+                    </div>
                 </div>
+
                 <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-slate-500 uppercase">Đang xử lý / Mới</p>
@@ -558,7 +567,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v45');
+            const saved = localStorage.getItem('warranty_records_gmusic_v46');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -585,7 +594,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v45', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v46', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
@@ -614,7 +623,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v45', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v46', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
@@ -1051,10 +1060,23 @@
         function updateStats() {
             const total = warrantyList.length;
 
-            const done = warrantyList.filter(i => {
+            const doneList = warrantyList.filter(i => {
                 const st = String(i.status || '').toLowerCase();
                 return st.includes('đã trả khách') || st.includes('đã sửa xong') || st.includes('hoàn trả') || st.includes('không sửa');
-            }).length;
+            });
+            const done = doneList.length;
+
+            // Phân loại: Đã trả mà có phí khách thanh toán (>0) là Sửa chữa, ngược lại là Bảo hành
+            let repairCount = 0;
+            let warrantyCount = 0;
+            doneList.forEach(i => {
+                const fee = Number(i.customerFee || 0);
+                if (fee > 0) {
+                    repairCount++;
+                } else {
+                    warrantyCount++;
+                }
+            });
 
             const pending = total - done;
 
@@ -1068,6 +1090,8 @@
 
             document.getElementById('rep-total-cases').innerText = total;
             document.getElementById('rep-done-cases').innerText = done;
+            document.getElementById('rep-warranty-cases').innerText = warrantyCount;
+            document.getElementById('rep-repair-cases').innerText = repairCount;
             document.getElementById('rep-pending-cases').innerText = pending;
             document.getElementById('rep-total-revenue').innerText = totalRev.toLocaleString('vi-VN') + ' đ';
 
