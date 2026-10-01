@@ -486,51 +486,31 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Tự động clear localStorage cũ để ép nhận dữ liệu chuẩn
-        if (!localStorage.getItem('gmusic_cleared_v56_fix_utc')) {
+        // Tự động clear localStorage cũ để ép nhận dữ liệu sạch
+        if (!localStorage.getItem('gmusic_cleared_v56_exact')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v56_fix_utc', 'true');
+            localStorage.setItem('gmusic_cleared_v56_exact', 'true');
         }
 
-        // HÀM XỬ LÝ TRIỆT ĐỂ CHUỖI UTC TỪ APPS SCRIPT
+        // LẤY ĐÚNG NGUYÊN VĂN TỪ APPS SCRIPT, TUYỆT ĐỐI KHÔNG CỘNG TRỪ LỆCH PHA
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
-            
-            // Nếu có chữ T (chuỗi ISO UTC từ Google Apps Script), cắt phần trước chữ T
+            // Nếu có chữ T (chuỗi UTC), lấy thẳng đúng phần ngày YYYY-MM-DD trước chữ T
             if (str.includes('T')) {
                 str = str.split('T')[0];
             }
-            
-            // Nếu là dạng YYYY-MM-DD, tiến hành cộng bù 1 ngày để chống lệch múi giờ
-            if (str.includes('-') && str.length >= 10) {
-                const parts = str.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    let y = parseInt(parts[0], 10);
-                    let m = parseInt(parts[1], 10) - 1;
-                    let d = parseInt(parts[2], 10);
-                    
-                    const dateObj = new Date(Date.UTC(y, m, d));
-                    dateObj.setUTCDate(dateObj.getUTCDate() + 1); // Bù đúng 1 ngày
-                    
-                    const finalY = dateObj.getUTCFullYear();
-                    const finalM = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-                    const finalD = String(dateObj.getUTCDate()).padStart(2, '0');
-                    
-                    return `${finalY}-${finalM}-${finalD}`;
-                }
-            }
-            return str;
+            return str; // Trả về nguyên bản YYYY-MM-DD không cộng bù lăng nhăng
         }
 
-        // Hiển thị ra bảng định dạng DD/MM/YYYY chuẩn Việt Nam
+        // Hiển thị ra bảng theo đúng chuẩn DD/MM/YYYY từ năm-tháng-ngày nguyên bản
         function parseDateToDisplay(val) {
             if (!val) return "—";
             let cleaned = cleanAndFormatDate(val);
             if (cleaned.includes('-') && cleaned.length >= 10) {
                 const parts = cleaned.substring(0, 10).split('-');
                 if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`; // Đảo thành Ngày/Tháng/Năm
                 }
             }
             return cleaned;
