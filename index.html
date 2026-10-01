@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v51</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v52</span>
                     </p>
                 </div>
             </div>
@@ -516,43 +516,19 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        function cleanAndFormatDate(val) {
+       function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
-            
-            // Nếu dữ liệu từ Sheet có dạng DD/MM/YYYY (ví dụ: 05/01/2026)
-            if (str.includes('/')) {
-                const parts = str.split('/');
-                if (parts.length === 3) {
-                    let d = parts[0].padStart(2, '0');
-                    let m = parts[1].padStart(2, '0');
-                    let y = parts[2];
-                    if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`; // Chuyển thành YYYY-MM-DD để hệ thống hiểu
-                }
-            }
-            
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            
-            return str.substring(0, 10);
+            if (str.includes('T')) str = str.split('T')[0];
+            return str;
         }
 
         function parseDateToDisplay(val) {
             if (!val) return "—";
             let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu dữ liệu đã ở dạng DD/MM/YYYY thì trả thẳng về luôn
-            if (str.includes('/') && str.length >= 10) {
-                return str.substring(0, 10);
-            }
-            
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            
-            // Nếu là dạng YYYY-MM-DD thì đảo ngược lại thành DD/MM/YYYY hiển thị ra web
+            // Nếu là dạng YYYY-MM-DD thì đổi thành DD/MM/YYYY
             if (str.includes('-') && str.length >= 10) {
                 const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
@@ -560,14 +536,16 @@
                 }
             }
             
+            // Nếu đã là dạng DD/MM/YYYY thì trả thẳng về nguyên bản
             return str;
         }
 
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu là dạng DD/MM/YYYY từ Sheet, đổi thành YYYY-MM-DD cho thẻ input type="date"
+            // Nếu từ Sheet về là DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" đọc được chính xác
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -579,15 +557,7 @@
                 }
             }
             
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            
-            if (str.includes('-') && str.length >= 10) {
-                return str.substring(0, 10);
-            }
-            
-            return str;
+            return str.substring(0, 10);
         }
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('warranty_records_gmusic_v47');
