@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v46</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v47</span>
                     </p>
                 </div>
             </div>
@@ -110,11 +110,14 @@
                         <option value="ANTARI">ANTARI</option>
                         <option value="P.AUDIO">P.AUDIO</option>
                     </select>
-                    <select id="filter-tech" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
-                        <option value="">Tất cả thợ sửa</option>
-                        <option value="Anh Tú">Anh Tú</option>
-                        <option value="Siêu">Siêu</option>
-                        <option value="Dũng">Dũng</option>
+                    <!-- Đã đổi thành lọc theo Tình trạng -->
+                    <select id="filter-status" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
+                        <option value="">Tất cả tình trạng</option>
+                        <option value="mới tiếp nhận">Mới tiếp nhận</option>
+                        <option value="đang xử lý">Đang xử lý</option>
+                        <option value="đã sửa xong">Đã sửa xong</option>
+                        <option value="đã trả khách">Đã trả khách</option>
+                        <option value="hoàn trả/không sửa">Hoàn trả / không sửa</option>
                     </select>
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto justify-end">
@@ -567,7 +570,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v46');
+            const saved = localStorage.getItem('warranty_records_gmusic_v47');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -594,7 +597,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v46', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v47', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
@@ -623,7 +626,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v46', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v47', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
@@ -809,7 +812,7 @@
             const emptyState = document.getElementById('empty-state');
             const search = document.getElementById('search-input').value.toLowerCase();
             const brandFilter = document.getElementById('filter-brand').value;
-            const techFilter = document.getElementById('filter-tech').value;
+            const statusFilter = document.getElementById('filter-status').value;
 
             let filtered = warrantyList.filter(item => {
                 const matchSearch = (item.ticketNumber && item.ticketNumber.toLowerCase().includes(search)) ||
@@ -817,8 +820,8 @@
                                     (item.customerName && item.customerName.toLowerCase().includes(search)) ||
                                     (item.itemName && item.itemName.toLowerCase().includes(search));
                 const matchBrand = !brandFilter || item.brand === brandFilter;
-                const matchTech = !techFilter || item.tech === techFilter;
-                return matchSearch && matchBrand && matchTech;
+                const matchStatus = !statusFilter || String(item.status || '').toLowerCase() === statusFilter;
+                return matchSearch && matchBrand && matchStatus;
             });
 
             filtered.sort((a, b) => {
@@ -1066,7 +1069,6 @@
             });
             const done = doneList.length;
 
-            // Phân loại: Đã trả mà có phí khách thanh toán (>0) là Sửa chữa, ngược lại là Bảo hành
             let repairCount = 0;
             let warrantyCount = 0;
             doneList.forEach(i => {
