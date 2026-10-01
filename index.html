@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v51</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v52</span>
                     </p>
                 </div>
             </div>
@@ -456,14 +456,12 @@
        // Lấy thẳng nguyên văn chuỗi từ Sheet, không qua bất kỳ hàm xử lý ngày tháng nào nữa
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            return String(val).trim().substring(0, 10);
+            return String(val).trim();
         }
-
         function parseDateToDisplay(val) {
             if (!val) return "—";
             return String(val).trim();
         }
-
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
