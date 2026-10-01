@@ -67,7 +67,10 @@
                 </div>
                 <div class="truncate">
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
-                    <p class="text-[10px] sm:text-xs text-slate-500 truncate">G.Music & Technical Center</p>
+                    <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
+                        <span>G.Music & Technical Center</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v45</span>
+                    </p>
                 </div>
             </div>
             <nav class="flex items-center space-x-1">
@@ -555,7 +558,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v44');
+            const saved = localStorage.getItem('warranty_records_gmusic_v45');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -582,12 +585,11 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v44', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v45', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
-        // TẢI DỮ LIỆU TỪ GOOGLE SHEET DÙNG FETCH CHUẨN
         async function syncDataFromCloud(isSilent = false) {
             if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
             try {
@@ -612,7 +614,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v44', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v45', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
@@ -623,7 +625,6 @@
             }
         }
 
-        // ĐỒNG BỘ THỦ CÔNG LÊN GOOGLE SHEET DÙNG FETCH POST CHUẨN
         async function manualSyncToCloud() {
             showToast('Đang lưu dữ liệu lên Google Sheet...');
             try {
