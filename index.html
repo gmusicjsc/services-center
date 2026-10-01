@@ -555,7 +555,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v43');
+            const saved = localStorage.getItem('warranty_records_gmusic_v44');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -582,21 +582,17 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v43', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v44', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
-        // TẢI DỮ LIỆU TỪ GOOGLE SHEET (DÙNG JSONP KHÔNG BỊ CẮT HOẶC CHẶN)
-        function syncDataFromCloud(isSilent = false) {
+        // TẢI DỮ LIỆU TỪ GOOGLE SHEET DÙNG FETCH CHUẨN
+        async function syncDataFromCloud(isSilent = false) {
             if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
-            
-            const callbackName = 'jsonp_load_cb_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                const scriptEl = document.getElementById('jsonp_load_script');
-                if (scriptEl) scriptEl.remove();
-
+            try {
+                const response = await fetch(googleScriptUrl);
+                const data = await response.json();
                 if (Array.isArray(data) && data.length > 0) {
                     warrantyList = data.map(i => ({
                         id: i['id'] || Date.now().toString() + Math.random(),
@@ -616,67 +612,51 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v43', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v44', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
-                    if (!isSilent) showToast('Tải dữ liệu thành công!');
+                    if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
                 }
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp_load_script';
-            script.src = `${googleScriptUrl}?callback=${callbackName}`;
-            script.onerror = function() {
-                if (!isSilent) showToast('Lỗi tải dữ liệu từ Google Sheet!', true);
-            };
-            document.body.appendChild(script);
+            } catch (err) {
+                console.error(err);
+                if (!isSilent) showToast('Lỗi tải dữ liệu!', true);
+            }
         }
 
-        // ĐỒNG BỘ THỦ CÔNG LÊN GOOGLE SHEET (DÙNG JSONP BẢO ĐẢM 100% THÊM, SỬA, XÓA THÀNH CÔNG)
-        function manualSyncToCloud() {
+        // ĐỒNG BỘ THỦ CÔNG LÊN GOOGLE SHEET DÙNG FETCH POST CHUẨN
+        async function manualSyncToCloud() {
             showToast('Đang lưu dữ liệu lên Google Sheet...');
-            
-            const payload = warrantyList.map((i, idx) => ({
-                "id": i.id,
-                "Số phiếu BH": i.ticketNumber,
-                "Số serial": i.serialNumber,
-                "Tên khách hàng": i.customerName,
-                "Tên hàng hóa": i.itemName,
-                "Thương hiệu": i.brand,
-                "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
-                "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
-                "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
-                "Mô tả lỗi": i.errorDesc,
-                "Nội dung xử lý": i.repairProcess,
-                "Người sửa": i.tech,
-                "Phí anh Tú báo": i.techFee,
-                "Phí báo khách": i.customerFee,
-                "Linh kiện thay thế": i.spareParts,
-                "Tình trạng": i.status
-            }));
+            try {
+                const payload = warrantyList.map((i, idx) => ({
+                    "id": i.id,
+                    "Số phiếu BH": i.ticketNumber,
+                    "Số serial": i.serialNumber,
+                    "Tên khách hàng": i.customerName,
+                    "Tên hàng hóa": i.itemName,
+                    "Thương hiệu": i.brand,
+                    "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
+                    "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
+                    "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
+                    "Mô tả lỗi": i.errorDesc,
+                    "Nội dung xử lý": i.repairProcess,
+                    "Người sửa": i.tech,
+                    "Phí anh Tú báo": i.techFee,
+                    "Phí báo khách": i.customerFee,
+                    "Linh kiện thay thế": i.spareParts,
+                    "Tình trạng": i.status
+                }));
 
-            const jsonStr = encodeURIComponent(JSON.stringify(payload));
-            const callbackName = 'jsonp_save_cb_' + Math.round(100000 * Math.random());
-            
-            window[callbackName] = function(res) {
-                delete window[callbackName];
-                const scriptEl = document.getElementById('jsonp_save_script');
-                if (scriptEl) scriptEl.remove();
-                
-                if (res && res.result === 'success') {
-                    showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
-                } else {
-                    showToast('Có lỗi khi lưu lên Google Sheet!', true);
-                }
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp_save_script';
-            script.src = `${googleScriptUrl}?action=save&data=${jsonStr}&callback=${callbackName}`;
-            script.onerror = function() {
-                showToast('Lỗi kết nối tới Google Sheet!', true);
-            };
-            document.body.appendChild(script);
+                await fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi lưu lên Google Sheet!', true);
+            }
         }
 
         function switchTab(tabId) {
