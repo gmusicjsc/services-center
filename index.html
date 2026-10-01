@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v52</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v53</span>
                     </p>
                 </div>
             </div>
@@ -518,26 +518,42 @@
 
        function cleanAndFormatDate(val) {
             if (!val) return "";
-            let str = String(val).trim();
-            if (str.includes('T')) str = str.split('T')[0];
-            return str;
-        }
-
-        function parseDateToDisplay(val) {
-            if (!val) return "—";
-            let str = String(val).trim();
-            if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu là dạng YYYY-MM-DD thì đổi thành DD/MM/YYYY
-            if (str.includes('-') && str.length >= 10) {
-                const parts = str.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            // Nếu vô tình nhận được đối tượng Date
+            if (val instanceof Date) {
+                if (!isNaN(val.getTime())) {
+                    const y = val.getFullYear();
+                    const m = String(val.getMonth() + 1).padStart(2, '0');
+                    const d = String(val.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
                 }
             }
             
-            // Nếu đã là dạng DD/MM/YYYY thì trả thẳng về nguyên bản
-            return str;
+            let str = String(val).trim();
+            
+            // Cắt bỏ phần giờ nếu có dạng ISO (T...)
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
+            
+            // Nếu dữ liệu đang là dạng DD/MM/YYYY (ví dụ: 03/09/2026)
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                if (parts.length === 3) {
+                    let d = parts[0].padStart(2, '0');
+                    let m = parts[1].padStart(2, '0');
+                    let y = parts[2];
+                    if (y.length === 2) y = '20' + y;
+                    return `${y}-${m}-${d}`;
+                }
+            }
+            
+            // Nếu đã là dạng YYYY-MM-DD thì giữ nguyên tuyệt đối, không cho qua Date object
+            if (str.includes('-') && str.length >= 10) {
+                return str.substring(0, 10);
+            }
+            
+            return str.substring(0, 10);
         }
 
         function parseDateToISO(val) {
