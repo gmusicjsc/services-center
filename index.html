@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v53</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v49</span>
                     </p>
                 </div>
             </div>
@@ -110,7 +110,6 @@
                         <option value="ANTARI">ANTARI</option>
                         <option value="P.AUDIO">P.AUDIO</option>
                     </select>
-                    <!-- Đã đổi thành lọc theo Tình trạng -->
                     <select id="filter-status" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
                         <option value="">Tất cả tình trạng</option>
                         <option value="mới tiếp nhận">Mới tiếp nhận</option>
@@ -167,7 +166,7 @@
                         <i class="fa-solid fa-folder-open"></i>
                     </div>
                     <p class="text-slate-600 font-medium text-sm">Chưa có dữ liệu bảo hành nào</p>
-                    <p class="text-slate-400 text-xs mt-1">Hãy thêm mới hoặc import file Excel từ MS List</p>
+                    <p class="text-slate-400 text-xs mt-1">Hãy bấm Tải từ Sheet hoặc Import file Excel</p>
                 </div>
             </div>
         </section>
@@ -309,20 +308,6 @@
                     <p class="text-xs text-slate-500 mt-0.5">Tải file Excel gốc từ Microsoft List để đồng bộ toàn bộ dữ liệu vào hệ thống.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 rounded-xl bg-purple-50 border border-purple-100 space-y-2">
-                        <h3 class="font-bold text-purple-900 text-sm">Tải Template Mẫu Chuẩn</h3>
-                        <p class="text-xs text-purple-700 leading-relaxed">File mẫu khớp 100% tên cột với file gốc của bạn.</p>
-                        <button onclick="downloadTemplate()" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold shadow-sm">
-                            <i class="fa-solid fa-download"></i> Tải Template Excel
-                        </button>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                        <h3 class="font-bold text-slate-800 text-sm">Cột hệ thống nhận diện</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Số phiếu BH, Số serial, Tên khách hàng, Tên hàng hóa, Thương hiệu, Ngày nhận thiết bị, Ngày trả thiết bị, Ngày mua hàng, Mô tả lỗi, Nội dung xử lý, Người sửa, Phí anh Tú báo, Phí báo khách, Linh kiện thay thế, Tình trạng.</p>
-                    </div>
-                </div>
-
                 <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-purple-500 transition bg-slate-50/50">
                     <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)" class="hidden">
                     <label for="excelFile" class="cursor-pointer flex flex-col items-center space-y-2">
@@ -346,7 +331,6 @@
                     <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-clipboard-list"></i></div>
                 </div>
                 
-                <!-- Thẻ Đã trả khách có chia dòng nhỏ Bảo hành / Sửa chữa -->
                 <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <div>
@@ -356,8 +340,8 @@
                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base sm:text-lg"><i class="fa-solid fa-circle-check"></i></div>
                     </div>
                     <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-medium">
-                        <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded" title="Đã trả & Không có phí khách">Bảo hành: <b id="rep-warranty-cases">0</b></span>
-                        <span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded" title="Đã trả & Có phí khách">Sửa chữa: <b id="rep-repair-cases">0</b></span>
+                        <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Bảo hành: <b id="rep-warranty-cases">0</b></span>
+                        <span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded">Sửa chữa: <b id="rep-repair-cases">0</b></span>
                     </div>
                 </div>
 
@@ -435,54 +419,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-600"></i> Thống kê theo Tình trạng</h3>
-                    <div class="overflow-x-auto max-h-64">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 sticky top-0">
-                                <tr class="text-slate-600 border-b border-slate-200">
-                                    <th class="p-2.5">Tình trạng</th>
-                                    <th class="p-2.5 text-center">Số lượng</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-status-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Thống kê theo Khách hàng</h3>
-                    <div class="overflow-x-auto max-h-64">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 sticky top-0">
-                                <tr class="text-slate-600 border-b border-slate-200">
-                                    <th class="p-2.5">Tên khách hàng</th>
-                                    <th class="p-2.5 text-center">Số ca</th>
-                                    <th class="p-2.5 text-right">Doanh thu</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-customer-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-box-archive text-purple-600"></i> Thống kê theo Hàng hóa</h3>
-                    <div class="overflow-x-auto max-h-64">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 sticky top-0">
-                                <tr class="text-slate-600 border-b border-slate-200">
-                                    <th class="p-2.5">Tên hàng hóa</th>
-                                    <th class="p-2.5 text-center">Số lượng</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-item-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
@@ -516,52 +452,13 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-       function cleanAndFormatDate(val) {
-            if (!val) return "";
-            
-            // Nếu vô tình nhận được đối tượng Date
-            if (val instanceof Date) {
-                if (!isNaN(val.getTime())) {
-                    const y = val.getFullYear();
-                    const m = String(val.getMonth() + 1).padStart(2, '0');
-                    const d = String(val.getDate()).padStart(2, '0');
-                    return `${y}-${m}-${d}`;
-                }
-            }
-            
-            let str = String(val).trim();
-            
-            // Cắt bỏ phần giờ nếu có dạng ISO (T...)
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            
-            // Nếu dữ liệu đang là dạng DD/MM/YYYY (ví dụ: 03/09/2026)
-            if (str.includes('/')) {
-                const parts = str.split('/');
-                if (parts.length === 3) {
-                    let d = parts[0].padStart(2, '0');
-                    let m = parts[1].padStart(2, '0');
-                    let y = parts[2];
-                    if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`;
-                }
-            }
-            
-            // Nếu đã là dạng YYYY-MM-DD thì giữ nguyên tuyệt đối, không cho qua Date object
-            if (str.includes('-') && str.length >= 10) {
-                return str.substring(0, 10);
-            }
-            
-            return str.substring(0, 10);
-        }
-
-        function parseDateToISO(val) {
+        // Xử lý ngày tháng THỜI GIAN THỰC: Nhận nguyên văn DD/MM/YYYY từ Sheet, không suy diễn múi giờ
+        function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
             if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu từ Sheet về là DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" đọc được chính xác
+            // Nếu từ Sheet dạng DD/MM/YYYY, đổi sang YYYY-MM-DD cho ô input type="date" đọc chính xác
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -572,11 +469,31 @@
                     return `${y}-${m}-${d}`;
                 }
             }
-            
             return str.substring(0, 10);
         }
+
+        function parseDateToDisplay(val) {
+            if (!val) return "—";
+            let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
+            
+            // Nếu là dạng YYYY-MM-DD thì đổi ngược lại thành DD/MM/YYYY hiển thị lên bảng
+            if (str.includes('-') && str.length >= 10) {
+                const parts = str.substring(0, 10).split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+            // Nếu đã là DD/MM/YYYY thì hiển thị nguyên văn
+            return str;
+        }
+
+        function parseDateToISO(val) {
+            return cleanAndFormatDate(val);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v47');
+            const saved = localStorage.getItem('warranty_records_gmusic_v49');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -603,16 +520,21 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v47', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v49', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
-        async function syncDataFromCloud(isSilent = false) {
+        // TẢI DỮ LIỆU DÙNG JSONP BẢO ĐẢM KHÔNG BAO GIỜ LỖI TẢI
+        function syncDataFromCloud(isSilent = false) {
             if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
-            try {
-                const response = await fetch(googleScriptUrl);
-                const data = await response.json();
+            
+            const callbackName = 'jsonp_load_cb_' + Math.round(100000 * Math.random());
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                const scriptEl = document.getElementById('jsonp_load_script');
+                if (scriptEl) scriptEl.remove();
+
                 if (Array.isArray(data) && data.length > 0) {
                     warrantyList = data.map(i => ({
                         id: i['id'] || Date.now().toString() + Math.random(),
@@ -621,9 +543,9 @@
                         customerName: String(i['Tên khách hàng'] || i['customerName'] || '').trim(),
                         itemName: String(i['Tên hàng hóa'] || i['itemName'] || '').trim(),
                         brand: String(i['Thương hiệu'] || i['brand'] || '').trim(),
-                        dateReceived: parseDateToISO(i['Ngày nhận thiết bị'] || i['dateReceived']),
-                        dateReturned: parseDateToISO(i['Ngày trả thiết bị'] || i['dateReturned']),
-                        purchaseDate: parseDateToISO(i['Ngày mua hàng'] || i['purchaseDate']),
+                        dateReceived: cleanAndFormatDate(i['Ngày nhận thiết bị'] || i['dateReceived']),
+                        dateReturned: cleanAndFormatDate(i['Ngày trả thiết bị'] || i['dateReturned']),
+                        purchaseDate: cleanAndFormatDate(i['Ngày mua hàng'] || i['purchaseDate']),
                         errorDesc: String(i['Mô tả lỗi'] || i['errorDesc'] || '').trim(),
                         repairProcess: String(i['Nội dung xử lý'] || i['repairProcess'] || '').trim(),
                         tech: String(i['Người sửa'] || i['tech'] || 'Anh Tú').trim(),
@@ -632,50 +554,66 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v47', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v49', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
-                    if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
+                    if (!isSilent) showToast('Tải dữ liệu thành công!');
                 }
-            } catch (err) {
-                console.error(err);
-                if (!isSilent) showToast('Lỗi tải dữ liệu!', true);
-            }
+            };
+
+            const script = document.createElement('script');
+            script.id = 'jsonp_load_script';
+            script.src = `${googleScriptUrl}?callback=${callbackName}`;
+            script.onerror = function() {
+                if (!isSilent) showToast('Lỗi tải dữ liệu từ Google Sheet!', true);
+            };
+            document.body.appendChild(script);
         }
 
-        async function manualSyncToCloud() {
+        function manualSyncToCloud() {
             showToast('Đang lưu dữ liệu lên Google Sheet...');
-            try {
-                const payload = warrantyList.map((i, idx) => ({
-                    "id": i.id,
-                    "Số phiếu BH": i.ticketNumber,
-                    "Số serial": i.serialNumber,
-                    "Tên khách hàng": i.customerName,
-                    "Tên hàng hóa": i.itemName,
-                    "Thương hiệu": i.brand,
-                    "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
-                    "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
-                    "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
-                    "Mô tả lỗi": i.errorDesc,
-                    "Nội dung xử lý": i.repairProcess,
-                    "Người sửa": i.tech,
-                    "Phí anh Tú báo": i.techFee,
-                    "Phí báo khách": i.customerFee,
-                    "Linh kiện thay thế": i.spareParts,
-                    "Tình trạng": i.status
-                }));
+            
+            const payload = warrantyList.map((i, idx) => ({
+                "id": i.id,
+                "Số phiếu BH": i.ticketNumber,
+                "Số serial": i.serialNumber,
+                "Tên khách hàng": i.customerName,
+                "Tên hàng hóa": i.itemName,
+                "Thương hiệu": i.brand,
+                "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
+                "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
+                "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
+                "Mô tả lỗi": i.errorDesc,
+                "Nội dung xử lý": i.repairProcess,
+                "Người sửa": i.tech,
+                "Phí anh Tú báo": i.techFee,
+                "Phí báo khách": i.customerFee,
+                "Linh kiện thay thế": i.spareParts,
+                "Tình trạng": i.status
+            }));
 
-                await fetch(googleScriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
-            } catch (err) {
-                console.error(err);
-                showToast('Lỗi lưu lên Google Sheet!', true);
-            }
+            const jsonStr = encodeURIComponent(JSON.stringify(payload));
+            const callbackName = 'jsonp_save_cb_' + Math.round(100000 * Math.random());
+            
+            window[callbackName] = function(res) {
+                delete window[callbackName];
+                const scriptEl = document.getElementById('jsonp_save_script');
+                if (scriptEl) scriptEl.remove();
+                
+                if (res && res.result === 'success') {
+                    showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
+                } else {
+                    showToast('Có lỗi khi lưu lên Google Sheet!', true);
+                }
+            };
+
+            const script = document.createElement('script');
+            script.id = 'jsonp_save_script';
+            script.src = `${googleScriptUrl}?action=save&data=${jsonStr}&callback=${callbackName}`;
+            script.onerror = function() {
+                showToast('Lỗi kết nối tới Google Sheet!', true);
+            };
+            document.body.appendChild(script);
         }
 
         function switchTab(tabId) {
@@ -737,9 +675,9 @@
             document.getElementById('customerName').value = item.customerName || '';
             document.getElementById('itemName').value = item.itemName || '';
             document.getElementById('brandInput').value = item.brand || '';
-            document.getElementById('dateReceived').value = parseDateToISO(item.dateReceived);
-            document.getElementById('dateReturned').value = parseDateToISO(item.dateReturned);
-            document.getElementById('purchaseDate').value = parseDateToISO(item.purchaseDate);
+            document.getElementById('dateReceived').value = cleanAndFormatDate(item.dateReceived);
+            document.getElementById('dateReturned').value = cleanAndFormatDate(item.dateReturned);
+            document.getElementById('purchaseDate').value = cleanAndFormatDate(item.purchaseDate);
             document.getElementById('errorDesc').value = item.errorDesc || '';
             document.getElementById('repairProcess').value = item.repairProcess || '';
             document.getElementById('techInput').value = item.tech || 'Anh Tú';
@@ -959,8 +897,9 @@
 
             const [yyyy, mm] = monthVal.split('-');
             const filtered = warrantyList.filter(i => {
-                if (!i.dateReceived) return false;
-                return i.dateReceived.startsWith(monthVal);
+                const iso = cleanAndFormatDate(i.dateReceived);
+                if (!iso) return false;
+                return iso.startsWith(monthVal);
             });
 
             if (filtered.length === 0) {
@@ -994,20 +933,6 @@
             showToast(`Đã xuất báo cáo tháng ${mm}/${yyyy} thành công!`);
         }
 
-        function downloadTemplate() {
-            const ws = XLSX.utils.json_to_sheet([{
-                "Số phiếu BH": "BH-2026-001", "Số serial": "SN123456", "Tên khách hàng": "NGUYỄN VĂN A",
-                "Tên hàng hóa": "XDJ-RX3", "Thương hiệu": "ALPHATHETA/PIONEERDJ", "Ngày nhận thiết bị": "2026-09-01",
-                "Ngày trả thiết bị": "2026-09-05", "Ngày mua hàng": "2025-01-01", "Mô tả lỗi": "Lỗi nguồn",
-                "Nội dung xử lý": "Thay nguồn", "Người sửa": "Anh Tú", "Phí anh Tú báo": 300000,
-                "Phí báo khách": 500000, "Linh kiện thay thế": "Bo nguồn", "Tình trạng": "đã trả khách"
-            }]);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Template_BaoHanh.xlsx");
-            showToast('Đã tải template mẫu!');
-        }
-
         function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1020,18 +945,18 @@
                     const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
 
                     if (!rows || rows.length === 0) {
-                        showToast('File Excel trống hoặc không có dữ liệu!', true);
+                        showToast('File Excel trống!', true);
                         return;
                     }
 
                     let count = 0;
                     rows.forEach(r => {
-                        const cName = r['Tên khách hàng'] || r['ten khach hang'] || '';
-                        const iName = r['Tên hàng hóa'] || r['ten hang hoa'] || '';
-                        const sNum = r['Số serial'] || r['so serial'] || '';
+                        const cName = r['Tên khách hàng'] || '';
+                        const iName = r['Tên hàng hóa'] || '';
+                        const sNum = r['Số serial'] || '';
                         if (!cName && !iName && !sNum) return;
 
-                        let tNum = r['Số phiếu BH'] || r['so phieu bh'] || '';
+                        let tNum = r['Số phiếu BH'] || '';
                         if (!tNum) tNum = `BH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
                         warrantyList.unshift({
@@ -1040,27 +965,26 @@
                             serialNumber: String(sNum).trim() || 'N/A',
                             customerName: String(cName).trim() || 'Khách lẻ',
                             itemName: String(iName).trim() || 'Thiết bị',
-                            brand: String(r['Thương hiệu'] || r['thuong hieu'] || 'ALPHATHETA/PIONEERDJ').trim(),
-                            dateReceived: parseDateToISO(r['Ngày nhận thiết bị'] || r['ngay nhan thiet bi']),
-                            dateReturned: parseDateToISO(r['Ngày trả thiết bị'] || r['ngay tra thiet bi']),
-                            purchaseDate: parseDateToISO(r['Ngày mua hàng'] || r['ngay mua hang']),
-                            errorDesc: String(r['Mô tả lỗi'] || r['mo ta loi'] || '').trim(),
-                            repairProcess: String(r['Nội dung xử lý'] || r['noi dung xu ly'] || '').trim(),
-                            tech: String(r['Người sửa'] || r['nguoi sua'] || 'Anh Tú').trim(),
-                            techFee: Number(r['Phí anh Tú báo'] || r['phi anh tu bao'] || r['Phí thợ báo'] || r['phi tho bao'] || 0) || 0,
-                            customerFee: Number(r['Phí báo khách'] || r['phi bao khach'] || 0) || 0,
-                            spareParts: String(r['Linh kiện thay thế'] || r['linh kien thay the'] || '').trim(),
-                            status: String(r['Tình trạng'] || r['tinh trang'] || 'đang xử lý').trim().toLowerCase()
+                            brand: String(r['Thương hiệu'] || 'ALPHATHETA/PIONEERDJ').trim(),
+                            dateReceived: cleanAndFormatDate(r['Ngày nhận thiết bị']),
+                            dateReturned: cleanAndFormatDate(r['Ngày trả thiết bị']),
+                            purchaseDate: cleanAndFormatDate(r['Ngày mua hàng']),
+                            errorDesc: String(r['Mô tả lỗi'] || '').trim(),
+                            repairProcess: String(r['Nội dung xử lý'] || '').trim(),
+                            tech: String(r['Người sửa'] || 'Anh Tú').trim(),
+                            techFee: Number(r['Phí anh Tú báo'] || 0) || 0,
+                            customerFee: Number(r['Phí báo khách'] || 0) || 0,
+                            spareParts: String(r['Linh kiện thay thế'] || '').trim(),
+                            status: String(r['Tình trạng'] || 'đang xử lý').trim().toLowerCase()
                         });
                         count++;
                     });
 
                     saveToStorage();
-                    showToast(`Import thành công ${count} mục bảo hành!`);
+                    showToast(`Import thành công ${count} mục!`);
                     switchTab('list');
                 } catch(err) {
-                    console.error(err);
-                    showToast('Lỗi đọc file Excel! Vui lòng kiểm tra lại cấu trúc.', true);
+                    showToast('Lỗi đọc file Excel!', true);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -1079,11 +1003,8 @@
             let warrantyCount = 0;
             doneList.forEach(i => {
                 const fee = Number(i.customerFee || 0);
-                if (fee > 0) {
-                    repairCount++;
-                } else {
-                    warrantyCount++;
-                }
+                if (fee > 0) repairCount++;
+                else warrantyCount++;
             });
 
             const pending = total - done;
@@ -1105,8 +1026,9 @@
 
             const monthMap = {};
             warrantyList.forEach(i => {
-                if (!i.dateReceived) return;
-                const mKey = i.dateReceived.substring(0, 7);
+                const iso = cleanAndFormatDate(i.dateReceived);
+                if (!iso || iso.length < 7) return;
+                const mKey = iso.substring(0, 7);
                 if (!monthMap[mKey]) monthMap[mKey] = { count: 0, rev: 0 };
                 monthMap[mKey].count++;
                 const st = String(i.status || '').toLowerCase();
@@ -1169,49 +1091,6 @@
                 `;
             }
             document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
-
-            const statusMap = {};
-            warrantyList.forEach(i => {
-                const st = i.status || 'đang xử lý';
-                statusMap[st] = (statusMap[st] || 0) + 1;
-            });
-            let statusHtml = '';
-            for (let [stName, count] of Object.entries(statusMap)) {
-                statusHtml += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2.5 font-medium text-slate-800 capitalize">${stName}</td>
-                        <td class="p-2.5 text-center font-bold text-purple-600">${count}</td>
-                    </tr>
-                `;
-            }
-            document.getElementById('report-status-body').innerHTML = statusHtml || `<tr><td colspan="2" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
-
-            const custMap = {};
-            warrantyList.forEach(i => {
-                const k = i.customerName || 'Khác';
-                if (!custMap[k]) custMap[k] = { count: 0, rev: 0 };
-                custMap[k].count++;
-                const st = String(i.status || '').toLowerCase();
-                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
-                    custMap[k].rev += Number(i.customerFee) || 0;
-                }
-            });
-            let cHtml = '';
-            for (let [k, v] of Object.entries(custMap)) {
-                cHtml += `<tr class="hover:bg-slate-50"><td class="p-2.5 font-medium text-slate-800">${k}</td><td class="p-2.5 text-center font-bold text-purple-600">${v.count}</td><td class="p-2.5 text-right font-semibold text-blue-600">${v.rev.toLocaleString('vi-VN')} đ</td></tr>`;
-            }
-            document.getElementById('report-customer-body').innerHTML = cHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
-
-            const itemMap = {};
-            warrantyList.forEach(i => {
-                const it = i.itemName || 'Khác';
-                itemMap[it] = (itemMap[it] || 0) + 1;
-            });
-            let iHtml = '';
-            for (let [k, v] of Object.entries(itemMap)) {
-                iHtml += `<tr class="hover:bg-slate-50"><td class="p-2.5 font-medium text-slate-800">${k}</td><td class="p-2.5 text-center font-bold text-purple-600">${v}</td></tr>`;
-            }
-            document.getElementById('report-item-body').innerHTML = iHtml || `<tr><td colspan="2" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
         }
     </script>
 </body>
