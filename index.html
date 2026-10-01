@@ -522,12 +522,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v56');
-            if (saved) {
-                try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
-            }
-            
-            syncDataFromCloud(true);
+            // Xóa bỏ đoạn đọc localStorage cũ rích gây kẹt dữ liệu, ép gọi thẳng từ Sheet xuống
+            syncDataFromCloud(false);
 
             const now = new Date();
             const yyyy = now.getFullYear();
