@@ -487,38 +487,52 @@
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
         // Tự động clear localStorage cũ để ép nhận dữ liệu chuẩn
-        if (!localStorage.getItem('gmusic_cleared_v56_pure')) {
+        if (!localStorage.getItem('gmusic_cleared_v56_fixdate')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v56_pure', 'true');
+            localStorage.setItem('gmusic_cleared_v56_fixdate', 'true');
         }
 
-        // Lấy thô nguyên bản chuỗi từ Sheet, không đụng chạm
+        // XỬ LÝ BÙ TRỪ NGÀY THÁNG ĐỂ KHẮC PHỤC LỆCH 1 NGÀY
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            return String(val).trim();
-        }
-
-        // Hiển thị nguyên văn chuỗi nhận được từ Sheet
-        function parseDateToDisplay(val) {
-            if (!val) return "—";
-            return String(val).trim();
-        }
-
-        // Chuyển đổi DD/MM/YYYY thành YYYY-MM-DD để form sửa đọc được
-        function parseDateToISO(val) {
-            if (!val) return "";
             let str = String(val).trim();
-            if (str.includes('/') && str.length >= 10) {
-                const parts = str.split('/');
+            
+            if (str.includes('-') && str.length >= 10) {
+                const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
-                    let d = parts[0].padStart(2, '0');
-                    let m = parts[1].padStart(2, '0');
-                    let y = parts[2];
-                    if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`;
+                    let y = parseInt(parts[0], 10);
+                    let m = parseInt(parts[1], 10) - 1;
+                    let d = parseInt(parts[2], 10);
+                    
+                    const dateObj = new Date(Date.UTC(y, m, d));
+                    dateObj.setUTCDate(dateObj.getUTCDate() + 1); // Cộng bù đúng 1 ngày
+                    
+                    const finalY = dateObj.getUTCFullYear();
+                    const finalM = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                    const finalD = String(dateObj.getUTCDate()).padStart(2, '0');
+                    
+                    return `${finalY}-${finalM}-${finalD}`;
                 }
             }
             return str;
+        }
+
+        // Hiển thị ra bảng định dạng DD/MM/YYYY chuẩn
+        function parseDateToDisplay(val) {
+            if (!val) return "—";
+            let cleaned = cleanAndFormatDate(val);
+            if (cleaned.includes('-') && cleaned.length >= 10) {
+                const parts = cleaned.substring(0, 10).split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+            return cleaned;
+        }
+
+        function parseDateToISO(val) {
+            if (!val) return "";
+            return cleanAndFormatDate(val);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
