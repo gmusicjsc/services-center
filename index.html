@@ -486,39 +486,38 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Tự động clear localStorage cũ để ép nhận dữ liệu sạch
-        if (!localStorage.getItem('gmusic_cleared_v56_exact')) {
+        // Tự động clear localStorage cũ để ép nhận dữ liệu chuẩn v57
+        if (!localStorage.getItem('gmusic_cleared_v57_final')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v56_exact', 'true');
+            localStorage.setItem('gmusic_cleared_v57_final', 'true');
         }
 
-        // LẤY ĐÚNG NGUYÊN VĂN TỪ APPS SCRIPT, TUYỆT ĐỐI KHÔNG CỘNG TRỪ LỆCH PHA
+        // Nhận nguyên văn chuỗi DD/MM/YYYY do Apps Script trả về
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            let str = String(val).trim();
-            // Nếu có chữ T (chuỗi UTC), lấy thẳng đúng phần ngày YYYY-MM-DD trước chữ T
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            return str; // Trả về nguyên bản YYYY-MM-DD không cộng bù lăng nhăng
+            return String(val).trim();
         }
 
-        // Hiển thị ra bảng theo đúng chuẩn DD/MM/YYYY từ năm-tháng-ngày nguyên bản
         function parseDateToDisplay(val) {
             if (!val) return "—";
-            let cleaned = cleanAndFormatDate(val);
-            if (cleaned.includes('-') && cleaned.length >= 10) {
-                const parts = cleaned.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`; // Đảo thành Ngày/Tháng/Năm
-                }
-            }
-            return cleaned;
+            return String(val).trim(); // Hiện y chang chuỗi dd/MM/yyyy nhận từ Sheet
         }
 
         function parseDateToISO(val) {
             if (!val) return "";
-            return cleanAndFormatDate(val);
+            let str = String(val).trim();
+            // Nếu từ Sheet dạng DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" đọc được
+            if (str.includes('/') && str.length >= 10) {
+                const parts = str.split('/');
+                if (parts.length === 3) {
+                    let d = parts[0].padStart(2, '0');
+                    let m = parts[1].padStart(2, '0');
+                    let y = parts[2];
+                    if (y.length === 2) y = '20' + y;
+                    return `${y}-${m}-${d}`;
+                }
+            }
+            return str;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -544,13 +543,13 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v56', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v57', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu v57 từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 const data = await response.json();
@@ -573,7 +572,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v56', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v57', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
