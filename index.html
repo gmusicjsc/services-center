@@ -420,7 +420,6 @@
                 </div>
             </div>
 
-            <!-- Bổ sung lại: Thống kê theo Khách hàng và Hàng hóa -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-users text-purple-600"></i> Thống kê theo Khách hàng</h3>
@@ -487,7 +486,12 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // LẤY NGUYÊN VĂN CHUỖI TỪ SHEET KHÔNG QUA BẤT KỲ XỬ LÝ NÀO
+        // TỰ ĐỘNG XÓA SẠCH LOCALSTORAGE CŨ GÂY KẸT DỮ LIỆU
+        if (!localStorage.getItem('gmusic_cleared_v56_forced')) {
+            localStorage.clear();
+            localStorage.setItem('gmusic_cleared_v56_forced', 'true');
+        }
+
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
@@ -499,7 +503,7 @@
             if (!val) return "—";
             let str = String(val).trim();
             if (str.includes('T')) str = str.split('T')[0];
-            return str; // Hiện y chang chuỗi nguyên bản DD/MM/YYYY từ Sheet
+            return str; 
         }
 
         function parseDateToISO(val) {
@@ -507,7 +511,6 @@
             let str = String(val).trim();
             if (str.includes('T')) str = str.split('T')[0];
             
-            // Nếu từ Sheet về dạng DD/MM/YYYY, chuyển thành YYYY-MM-DD để ô input type="date" trong form đọc được
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -522,7 +525,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Xóa bỏ đoạn đọc localStorage cũ rích gây kẹt dữ liệu, ép gọi thẳng từ Sheet xuống
             syncDataFromCloud(false);
 
             const now = new Date();
@@ -551,7 +553,7 @@
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu mới từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 const data = await response.json();
@@ -577,7 +579,7 @@
                     localStorage.setItem('warranty_records_gmusic_v56', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
-                    if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
+                    if (!isSilent) showToast('Tải dữ liệu thành công!');
                 }
             } catch (err) {
                 console.error(err);
@@ -1110,7 +1112,6 @@
             }
             document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // Thống kê theo Khách hàng
             const customerMap = {};
             warrantyList.forEach(i => {
                 const cName = i.customerName || 'Khách lẻ';
@@ -1133,7 +1134,6 @@
             }
             document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // Thống kê theo Hàng hóa
             const itemMap = {};
             warrantyList.forEach(i => {
                 const itName = i.itemName || 'Thiết bị';
