@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v57</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v58</span>
                     </p>
                 </div>
             </div>
@@ -486,27 +486,41 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Tự động clear localStorage cũ để ép nhận dữ liệu chuẩn v57
-        if (!localStorage.getItem('gmusic_cleared_v57_final')) {
+        // Tự động clear localStorage cũ để ép nhận bản v58 sạch sẽ
+        if (!localStorage.getItem('gmusic_cleared_v58_fix')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v57_final', 'true');
+            localStorage.setItem('gmusic_cleared_v58_fix', 'true');
         }
 
-        // Nhận nguyên văn chuỗi DD/MM/YYYY do Apps Script trả về
+        // HÀM LỌC BỎ TRỰC TIẾP CHUỖI UTC T17:00:00.000Z NẾU CÒN SÓT LẠI
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            return String(val).trim();
+            let str = String(val).trim();
+            // Nếu vô tình lòi ra chuỗi ISO UTC, cắt phăng từ chữ T đi để lấy lại YYYY-MM-DD chính xác
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
+            // Nếu là YYYY-MM-DD, đổi thành DD/MM/YYYY chuẩn Việt Nam
+            if (str.includes('-') && str.length >= 10) {
+                const parts = str.substring(0, 10).split('-');
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
+            return str;
         }
 
         function parseDateToDisplay(val) {
             if (!val) return "—";
-            return String(val).trim(); // Hiện y chang chuỗi dd/MM/yyyy nhận từ Sheet
+            return cleanAndFormatDate(val);
         }
 
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
-            // Nếu từ Sheet dạng DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" đọc được
+            if (str.includes('T')) str = str.split('T')[0];
+            
+            // Chuyển đổi DD/MM/YYYY hoặc YYYY-MM-DD thành YYYY-MM-DD cho ô input type="date"
             if (str.includes('/') && str.length >= 10) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -543,13 +557,13 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v57', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v58', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu v57 từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu v58 từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 const data = await response.json();
@@ -572,7 +586,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v57', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v58', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
