@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v50</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v51</span>
                     </p>
                 </div>
             </div>
@@ -518,25 +518,9 @@
 
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            
-            // Nếu là đối tượng Date từ Google Sheet / Excel trả về
-            if (val instanceof Date) {
-                if (!isNaN(val.getTime())) {
-                    const y = val.getFullYear();
-                    const m = String(val.getMonth() + 1).padStart(2, '0');
-                    const d = String(val.getDate()).padStart(2, '0');
-                    return `${y}-${m}-${d}`;
-                }
-            }
-            
             let str = String(val).trim();
             
-            // Nếu có chữ T (dạng ISO chuẩn UTC), cắt bỏ phần giờ phút phía sau để lấy đúng ngày gốc
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            
-            // Nếu chuỗi ở định dạng DD/MM/YYYY hoặc D/M/YYYY
+            // Nếu dữ liệu từ Sheet có dạng DD/MM/YYYY (ví dụ: 05/01/2026)
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -544,24 +528,12 @@
                     let m = parts[1].padStart(2, '0');
                     let y = parts[2];
                     if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`;
+                    return `${y}-${m}-${d}`; // Chuyển thành YYYY-MM-DD để hệ thống hiểu
                 }
             }
             
-            // Nếu chuỗi đã ở định dạng YYYY-MM-DD thì trả về nguyên bản, cấm tuyệt đối quy đổi múi giờ
-            if (str.includes('-') && str.length >= 10) {
-                return str.substring(0, 10);
-            }
-            
-            // Xử lý Serial Number ngày của Excel (số đếm ngày)
-            if (!isNaN(str) && Number(str) > 30000 && Number(str) < 60000) {
-                const d = new Date(Math.round((Number(str) - (25567 + 2)) * 86400 * 1000));
-                if (!isNaN(d.getTime())) {
-                    const y = d.getUTCFullYear();
-                    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(d.getUTCDate()).padStart(2, '0');
-                    return `${y}-${m}-${day}`;
-                }
+            if (str.includes('T')) {
+                str = str.split('T')[0];
             }
             
             return str.substring(0, 10);
@@ -570,19 +542,32 @@
         function parseDateToDisplay(val) {
             if (!val) return "—";
             let str = String(val).trim();
-            if (str.includes('T')) str = str.split('T')[0];
+            
+            // Nếu dữ liệu đã ở dạng DD/MM/YYYY thì trả thẳng về luôn
+            if (str.includes('/') && str.length >= 10) {
+                return str.substring(0, 10);
+            }
+            
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
+            
+            // Nếu là dạng YYYY-MM-DD thì đảo ngược lại thành DD/MM/YYYY hiển thị ra web
             if (str.includes('-') && str.length >= 10) {
                 const parts = str.substring(0, 10).split('-');
-                if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                if (parts.length === 3) {
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
             }
-            if (str.includes('/') && str.length >= 10) return str.substring(0, 10);
+            
             return str;
         }
 
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
-            if (str.includes('T')) str = str.split('T')[0];
+            
+            // Nếu là dạng DD/MM/YYYY từ Sheet, đổi thành YYYY-MM-DD cho thẻ input type="date"
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -593,7 +578,15 @@
                     return `${y}-${m}-${d}`;
                 }
             }
-            if (str.includes('-') && str.length >= 10) return str.substring(0, 10);
+            
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
+            
+            if (str.includes('-') && str.length >= 10) {
+                return str.substring(0, 10);
+            }
+            
             return str;
         }
         window.addEventListener('DOMContentLoaded', () => {
