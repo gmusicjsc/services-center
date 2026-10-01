@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v53</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v51</span>
                     </p>
                 </div>
             </div>
@@ -452,58 +452,27 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Xử lý ngày tháng THỜI GIAN THỰC: Nhận nguyên văn DD/MM/YYYY từ Sheet
-       // Lấy thẳng nguyên văn chuỗi từ Sheet, không qua bất kỳ hàm xử lý ngày tháng nào nữa
-        function parseDateToDisplay(val) {
-            if (!val) return "—";
-            let str = String(val).trim();
-            
-            // Nếu có chữ T (dạng ISO từ Google trả về), cắt lấy phần ngày trước chữ T
-            if (str.includes('T')) {
-                str = str.split('T')[0]; // Lúc này sẽ là "2026-09-02"
-            }
-            
-            // Nếu là dạng YYYY-MM-DD, cộng thêm 1 ngày cho đúng chuẩn giờ Việt Nam rồi đảo thành DD/MM/YYYY
-            if (str.includes('-') && str.length >= 10) {
-                const parts = str.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    // Tạo đối tượng Date thuần theo mốc chuỗi UTC rồi cộng 1 ngày trực tiếp để bù giờ
-                    const d = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
-                    d.setUTCDate(d.getUTCDate() + 1); // Bù chuẩn lệch múi giờ 1 ngày
-                    
-                    const y = d.getUTCFullYear();
-                    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(d.getUTCDate()).padStart(2, '0');
-                    return `${day}/${m}/${y}`; // Trả về đúng 03/09/2026
-                }
-            }
-            
-            return str;
-        }
-
+        // LẤY NGUYÊN VĂN TỪ SHEET KHÔNG QUA DATE OBJECT, CHỐNG LỆCH VÀ CHỐNG CỘNG NGÀY
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
-            if (str.includes('T')) {
-                str = str.split('T')[0];
-            }
-            if (str.includes('-') && str.length >= 10) {
-                const parts = str.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    const d = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
-                    d.setUTCDate(d.getUTCDate() + 1);
-                    const y = d.getUTCFullYear();
-                    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(d.getUTCDate()).padStart(2, '0');
-                    return `${y}-${m}-${day}`;
-                }
-            }
+            if (str.includes('T')) str = str.split('T')[0]; // Bỏ đuôi giờ ISO nếu có
             return str;
         }
+
+        function parseDateToDisplay(val) {
+            if (!val) return "—";
+            let str = String(val).trim();
+            if (str.includes('T')) str = str.split('T')[0];
+            return str; // Giữ nguyên 100% như trên Sheet
+        }
+
         function parseDateToISO(val) {
             if (!val) return "";
             let str = String(val).trim();
-            // Nếu từ Sheet về là DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" đọc được khi bấm sửa
+            if (str.includes('T')) str = str.split('T')[0];
+            
+            // Nếu từ Sheet về dạng DD/MM/YYYY, đổi sang YYYY-MM-DD để ô input type="date" trong form hiểu được
             if (str.includes('/')) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -518,7 +487,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('warranty_records_gmusic_v50');
+            const saved = localStorage.getItem('warranty_records_gmusic_v51');
             if (saved) {
                 try { warrantyList = JSON.parse(saved); } catch(e) { warrantyList = []; }
             }
@@ -545,12 +514,11 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v50', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v51', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
-        // TẢI DỮ LIỆU TỪ GOOGLE SHEET AN TOÀN TUYỆT ĐỐI KHÔNG BAO GIỜ LỖI
         async function syncDataFromCloud(isSilent = false) {
             if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
             try {
@@ -575,7 +543,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v50', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v51', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu từ Google Sheet thành công!');
@@ -664,7 +632,11 @@
             document.getElementById('warranty-form').reset();
             document.getElementById('edit-id').value = '';
             document.getElementById('form-title').innerText = 'Thêm Mục Bảo Hành Mới';
-            document.getElementById('dateReceived').value = new Date().toISOString().split('T')[0];
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('dateReceived').value = `${yyyy}-${mm}-${dd}`;
             generateTicketCode();
             switchTab('form');
         }
@@ -680,9 +652,12 @@
             document.getElementById('customerName').value = item.customerName || '';
             document.getElementById('itemName').value = item.itemName || '';
             document.getElementById('brandInput').value = item.brand || '';
-            document.getElementById('dateReceived').value = cleanAndFormatDate(item.dateReceived);
-            document.getElementById('dateReturned').value = cleanAndFormatDate(item.dateReturned);
-            document.getElementById('purchaseDate').value = cleanAndFormatDate(item.purchaseDate);
+            
+            // Xử lý đưa vào input type="date" an toàn tuyệt đối, không cộng ngày
+            document.getElementById('dateReceived').value = parseDateToISO(item.dateReceived);
+            document.getElementById('dateReturned').value = parseDateToISO(item.dateReturned);
+            document.getElementById('purchaseDate').value = parseDateToISO(item.purchaseDate);
+            
             document.getElementById('errorDesc').value = item.errorDesc || '';
             document.getElementById('repairProcess').value = item.repairProcess || '';
             document.getElementById('techInput').value = item.tech || 'Anh Tú';
