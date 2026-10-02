@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v66</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v67</span>
                     </p>
                 </div>
             </div>
@@ -486,21 +486,21 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Tự động clear localStorage cũ để nhận bản v66
-        if (!localStorage.getItem('gmusic_cleared_v66_plain_text')) {
+        // Tự động clear localStorage cũ để nhận bản v67
+        if (!localStorage.getItem('gmusic_cleared_v67_fix_techs')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v66_plain_text', 'true');
+            localStorage.setItem('gmusic_cleared_v67_fix_techs', 'true');
         }
 
-        // BỘ LỌC DỮ LIỆU THUẦN TÚY (PLAIN TEXT): Giữ nguyên văn chuỗi nhận từ Sheet, không đụng chạm múi giờ
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
-            // Nếu Sheet đẩy lên dạng YYYY-MM-DD
+            if (str.includes('T')) {
+                str = str.split('T')[0];
+            }
             if (str.includes('-') && str.length >= 10) {
                 return str.substring(0, 10);
             }
-            // Nếu Sheet đẩy lên dạng DD/MM/YYYY, đổi sang YYYY-MM-DD để hệ thống chuẩn hóa nội bộ
             if (str.includes('/') && str.length >= 10) {
                 const parts = str.split('/');
                 if (parts.length === 3) {
@@ -511,7 +511,7 @@
                     return `${y}-${m}-${d}`;
                 }
             }
-            return str;
+            return str.substring(0, 10);
         }
 
         function parseDateToDisplay(val) {
@@ -520,7 +520,7 @@
             if (iso.includes('-') && iso.length >= 10) {
                 const parts = iso.substring(0, 10).split('-');
                 if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`; // Đổi thành DD/MM/YYYY để hiển thị
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
             }
             return iso;
@@ -553,13 +553,13 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v66', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v67', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu v66 từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu v67 từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 if (!response.ok) throw new Error('Network response was not ok');
@@ -583,7 +583,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v66', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v67', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
@@ -1122,7 +1122,7 @@
                     customerMap[cName].rev += Number(i.customerFee) || 0;
                 }
             });
-            let customerHtml = {};
+            let customerHtml = '';
             for (let [cName, data] of Object.entries(customerMap)) {
                 customerHtml += `
                     <tr class="hover:bg-slate-50">
