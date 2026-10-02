@@ -494,46 +494,26 @@
 
         // HÀM PARSER CHUẨN XÁC: Đọc trực tiếp chuỗi gốc, chống lỗi múi giờ UTC trừ 7 tiếng
        // BỘ GIẢI MÃ TUYỆT ĐỐI CHO BẢN WEB
+        // BỘ LỌC NGUYÊN BẢN: Thấy sao lấy vậy, tuyệt đối không cộng trừ lệch pha
         function cleanAndFormatDate(val) {
             if (!val) return "";
             let str = String(val).trim();
             
-            // 1. Nếu dính định dạng ISO UTC (có chữ T), cắt lấy phần ngày tháng năm trước chữ T
+            // Nếu có chữ T (chuỗi UTC), cắt lấy phần YYYY-MM-DD trước chữ T
             if (str.includes('T')) {
                 str = str.split('T')[0];
             }
             
-            // 2. Nếu là dạng YYYY-MM-DD
+            // Nếu là dạng YYYY-MM-DD, chuyển thẳng sang DD/MM/YYYY chuẩn xác nguyên bản
             if (str.includes('-') && str.length >= 10) {
                 const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
-                    let y = parts[0];
-                    let m = parts[1];
-                    let d = parts[2];
-                    // Kiểm tra nếu bị lệch múi giờ, ta dùng UTC Date để dịch lại chuẩn xác ngày
-                    const dateObj = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
-                    // Cộng bù 1 ngày nếu backend trả về mốc 17h chiều hôm trước
-                    dateObj.setUTCDate(dateObj.getUTCDate() + 1);
-                    
-                    const finalY = dateObj.getUTCFullYear();
-                    const finalM = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-                    const finalD = String(dateObj.getUTCDate()).padStart(2, '0');
-                    return `${finalY}-${finalM}-${finalD}`;
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
                 }
             }
             
-            // 3. Nếu là dạng số serial của Excel / Google Sheet (ví dụ: 46289)
-            if (!isNaN(str) && Number(str) > 30000 && Number(str) < 60000) {
-                const d = new Date(Math.round((Number(str) - (25567 + 2)) * 86400 * 1000));
-                if (!isNaN(d.getTime())) {
-                    const y = d.getUTCFullYear();
-                    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-                    const day = String(d.getUTCDate()).padStart(2, '0');
-                    return `${y}-${m}-${day}`;
-                }
-            }
-            
-            return str.substring(0, 10);
+            // Nếu đã là DD/MM/YYYY thì giữ nguyên
+            return str;
         }
 
         // Hiển thị ra bảng theo định dạng DD/MM/YYYY chuẩn Việt Nam
