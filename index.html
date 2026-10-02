@@ -493,34 +493,46 @@
         }
 
         // HÀM PARSER CHUẨN XÁC: Đọc trực tiếp chuỗi gốc, chống lỗi múi giờ UTC trừ 7 tiếng
+       // BỘ GIẢI MÃ TUYỆT ĐỐI CHO BẢN WEB
         function cleanAndFormatDate(val) {
             if (!val) return "";
-            if (val instanceof Date) {
-                if (!isNaN(val.getTime())) {
-                    const y = val.getUTCFullYear();
-                    const m = String(val.getUTCMonth() + 1).padStart(2, '0');
-                    const d = String(val.getUTCDate()).padStart(2, '0');
-                    return `${y}-${m}-${d}`;
-                }
-            }
             let str = String(val).trim();
-            // Nếu lỡ dính chuỗi ISO UTC từ Sheet có chữ T, băm lấy phần ngày trước chữ T
+            
+            // 1. Nếu dính định dạng ISO UTC (có chữ T), cắt lấy phần ngày tháng năm trước chữ T
             if (str.includes('T')) {
                 str = str.split('T')[0];
             }
-            if (str.includes('/')) {
-                const parts = str.split('/');
+            
+            // 2. Nếu là dạng YYYY-MM-DD
+            if (str.includes('-') && str.length >= 10) {
+                const parts = str.substring(0, 10).split('-');
                 if (parts.length === 3) {
-                    let d = parts[0].padStart(2, '0');
-                    let m = parts[1].padStart(2, '0');
-                    let y = parts[2];
-                    if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`;
+                    let y = parts[0];
+                    let m = parts[1];
+                    let d = parts[2];
+                    // Kiểm tra nếu bị lệch múi giờ, ta dùng UTC Date để dịch lại chuẩn xác ngày
+                    const dateObj = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+                    // Cộng bù 1 ngày nếu backend trả về mốc 17h chiều hôm trước
+                    dateObj.setUTCDate(dateObj.getUTCDate() + 1);
+                    
+                    const finalY = dateObj.getUTCFullYear();
+                    const finalM = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                    const finalD = String(dateObj.getUTCDate()).padStart(2, '0');
+                    return `${finalY}-${finalM}-${finalD}`;
                 }
             }
-            if (str.includes('-') && str.length >= 10) {
-                return str.substring(0, 10);
+            
+            // 3. Nếu là dạng số serial của Excel / Google Sheet (ví dụ: 46289)
+            if (!isNaN(str) && Number(str) > 30000 && Number(str) < 60000) {
+                const d = new Date(Math.round((Number(str) - (25567 + 2)) * 86400 * 1000));
+                if (!isNaN(d.getTime())) {
+                    const y = d.getUTCFullYear();
+                    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+                    const day = String(d.getUTCDate()).padStart(2, '0');
+                    return `${y}-${m}-${day}`;
+                }
             }
+            
             return str.substring(0, 10);
         }
 
