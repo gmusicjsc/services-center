@@ -486,12 +486,6 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        // Tự động clear localStorage cũ để nhận bản v68
-        if (!localStorage.getItem('gmusic_cleared_v68_plain_sync')) {
-            localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v68_plain_sync', 'true');
-        }
-
         // CHUẨN HÓA DỮ LIỆU NGÀY THÁNG DƯỚI DẠNG TEXT THUẦN TÚY (YYYY-MM-DD)
         function cleanAndFormatDate(val) {
             if (!val) return "";
@@ -515,15 +509,12 @@
             return str.substring(0, 10);
         }
 
-       function parseDateToDisplay(val) {
+        function parseDateToDisplay(val) {
             if (!val || val === "—" || val === "") return "—";
-            
             let valStr = String(val).trim();
 
-            // Nếu Google Sheet trả về dạng Date hoặc chuỗi chuẩn, ta ép nó cộng bù lại đúng múi giờ
             let d = new Date(valStr);
             if (!isNaN(d.getTime())) {
-                // Cộng thêm 7 tiếng (hoặc dùng múi giờ local) để chống lệch lùi 1 ngày do UTC
                 let localDate = new Date(d.getTime() + (d.getTimezoneOffset() * 60000) + (7 * 3600000));
                 if (!isNaN(localDate.getTime()) && localDate.getFullYear() > 2000) {
                     const day = String(localDate.getDate()).padStart(2, '0');
@@ -533,7 +524,6 @@
                 }
             }
 
-            // Xử lý các dạng chuỗi thủ công YYYY-MM-DD hoặc DD/MM/YYYY
             if (/^\d{4}-\d{2}-\d{2}$/.test(valStr)) {
                 const parts = valStr.split('-');
                 return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -546,6 +536,11 @@
         }
 
         function parseDateToISO(val) {
+            return cleanAndFormatDate(val);
+        }
+
+        // Định nghĩa hàm phụ trợ còn thiếu để tránh lỗi ReferenceError
+        function parseDateToInput(val) {
             return cleanAndFormatDate(val);
         }
 
@@ -591,9 +586,9 @@
                         customerName: String(i['Tên khách hàng'] || i['customerName'] || '').trim(),
                         itemName: String(i['Tên hàng hóa'] || i['itemName'] || '').trim(),
                         brand: String(i['Thương hiệu'] || i['brand'] || '').trim(),
-                        dateReceived: cleanAndFormatDate(i['Ngày nhận thiết bị'] || i['dateReceived']),
-                        dateReturned: cleanAndFormatDate(i['Ngày trả thiết bị'] || i['dateReturned']),
-                        purchaseDate: cleanAndFormatDate(i['Ngày mua hàng'] || i['purchaseDate']),
+                        dateReceived: cleanAndFormatDate(i['Ngày nhận thiết bị'] || i['ngaynhan'] || i['dateReceived']),
+                        dateReturned: cleanAndFormatDate(i['Ngày trả thiết bị'] || i['ngaytra'] || i['dateReturned']),
+                        purchaseDate: cleanAndFormatDate(i['Ngày mua hàng'] || i['ngaymua'] || i['purchaseDate']),
                         errorDesc: String(i['Mô tả lỗi'] || i['errorDesc'] || '').trim(),
                         repairProcess: String(i['Nội dung xử lý'] || i['repairProcess'] || '').trim(),
                         tech: String(i['Người sửa'] || i['tech'] || 'Anh Tú').trim(),
@@ -613,7 +608,7 @@
             }
         }
 
-      async function manualSyncToCloud() {
+        async function manualSyncToCloud() {
             showToast('Đang lưu dữ liệu lên Google Sheet...');
             try {
                 const payload = warrantyList.map(i => ({
@@ -623,7 +618,6 @@
                     "Tên khách hàng": String(i.customerName || ''),
                     "Tên hàng hóa": String(i.itemName || ''),
                     "Thương hiệu": String(i.brand || ''),
-                    // Ghi đúng định dạng ngày thô vào 3 cột thô để Google Sheet tự chạy hàm TEXT ở các cột hiển thị
                     "ngaynhan": String(parseDateToInput(i.dateReceived) || ''),
                     "ngaytra": String(parseDateToInput(i.dateReturned) || ''),
                     "ngaymua": String(parseDateToInput(i.purchaseDate) || ''),
@@ -1004,9 +998,9 @@
                             customerName: String(cName).trim() || 'Khách lẻ',
                             itemName: String(iName).trim() || 'Thiết bị',
                             brand: String(r['Thương hiệu'] || 'ALPHATHETA/PIONEERDJ').trim(),
-                            dateReceived: cleanAndFormatDate(r['Ngày nhận thiết bị']),
-                            dateReturned: cleanAndFormatDate(r['Ngày trả thiết bị']),
-                            purchaseDate: cleanAndFormatDate(r['Ngày mua hàng']),
+                            dateReceived: cleanAndFormatDate(r['Ngày nhận thiết bị'] || r['ngaynhan']),
+                            dateReturned: cleanAndFormatDate(r['Ngày trả thiết bị'] || r['ngaytra']),
+                            purchaseDate: cleanAndFormatDate(r['Ngày mua hàng'] || r['ngaymua']),
                             errorDesc: String(r['Mô tả lỗi'] || '').trim(),
                             repairProcess: String(r['Nội dung xử lý'] || '').trim(),
                             tech: String(r['Người sửa'] || 'Anh Tú').trim(),
