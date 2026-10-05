@@ -573,7 +573,7 @@
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu v70 từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 if (!response.ok) throw new Error('Network response was not ok');
@@ -586,6 +586,7 @@
                         customerName: String(i['Tên khách hàng'] || i['customerName'] || '').trim(),
                         itemName: String(i['Tên hàng hóa'] || i['itemName'] || '').trim(),
                         brand: String(i['Thương hiệu'] || i['brand'] || '').trim(),
+                        // Hứng ngày từ cả cột hiển thị có hàm TEXT hoặc từ cột thô ngaynhan/ngaytra/ngaymua
                         dateReceived: cleanAndFormatDate(i['Ngày nhận thiết bị'] || i['ngaynhan'] || i['dateReceived']),
                         dateReturned: cleanAndFormatDate(i['Ngày trả thiết bị'] || i['ngaytra'] || i['dateReturned']),
                         purchaseDate: cleanAndFormatDate(i['Ngày mua hàng'] || i['ngaymua'] || i['purchaseDate']),
