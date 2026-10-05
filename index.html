@@ -609,8 +609,8 @@
             }
         }
 
-        async function manualSyncToCloud() {
-            showToast('Đang lưu dữ liệu lên Google Sheet...');
+      async function manualSyncToCloud() {
+            showToast('Đang đồng bộ dữ liệu lên Google Sheet...');
             try {
                 const payload = warrantyList.map(i => ({
                     "id": String(i.id || ''),
@@ -619,6 +619,7 @@
                     "Tên khách hàng": String(i.customerName || ''),
                     "Tên hàng hóa": String(i.itemName || ''),
                     "Thương hiệu": String(i.brand || ''),
+                    // Chỉ gửi ngày thô lên, kệ xác các cột hiển thị trên Sheet để Apps Script tự lo
                     "ngaynhan": String(parseDateToInput(i.dateReceived) || ''),
                     "ngaytra": String(parseDateToInput(i.dateReturned) || ''),
                     "ngaymua": String(parseDateToInput(i.purchaseDate) || ''),
@@ -637,7 +638,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                showToast('Đã lưu dữ liệu lên Google Sheet thành công!');
+                showToast('Đã đồng bộ lên Google Sheet thành công!');
             } catch (err) {
                 console.error(err);
                 showToast('Lỗi lưu lên Google Sheet!', true);
