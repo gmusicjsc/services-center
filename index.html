@@ -516,15 +516,43 @@
         }
 
         function parseDateToDisplay(val) {
-            if (!val) return "—";
-            let iso = cleanAndFormatDate(val);
-            if (iso.includes('-') && iso.length >= 10) {
-                const parts = iso.substring(0, 10).split('-');
-                if (parts.length === 3) {
-                    return `${parts[2]}/${parts[1]}/${parts[0]}`; // Hiển thị DD/MM/YYYY chuẩn Việt Nam
+            if (!val || val === "—" || val === "") return "—";
+            
+            let valStr = String(val).trim();
+
+            // 1. Nếu là chuỗi ISO hoặc có dạng chứa thời gian UTC (ví dụ: 2026-01-04T17:00:00.000Z)
+            if (valStr.includes('T') || valStr.includes('Z')) {
+                let d = new Date(valStr);
+                if (!isNaN(d.getTime())) {
+                    // Dùng trực tiếp giờ địa phương của trình duyệt (Việt Nam GMT+7) để chống lệch ngày
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    return `${day}/${month}/${year}`;
                 }
             }
-            return iso;
+
+            // 2. Nếu là dạng YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(valStr)) {
+                const parts = valStr.split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+
+            // 3. Nếu đã đúng định dạng DD/MM/YYYY rồi thì giữ nguyên
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(valStr)) {
+                return valStr;
+            }
+
+            // 4. Trường hợp Google Sheet trả về dạng Date object hoặc chuỗi ngày tháng chung chung
+            let d = new Date(valStr);
+            if (!isNaN(d.getTime()) && d.getFullYear() > 2000) {
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            return valStr;
         }
 
         function parseDateToISO(val) {
