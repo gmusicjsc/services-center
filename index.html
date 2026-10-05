@@ -722,7 +722,7 @@
             document.getElementById('status').value = item.status || 'đang xử lý';
         }
 
-        function saveWarrantyItem(e) {
+       async function saveWarrantyItem(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const newItem = {
@@ -747,13 +747,47 @@
             if (id) {
                 const idx = warrantyList.findIndex(i => i.id === id);
                 if (idx !== -1) warrantyList[idx] = newItem;
-                showToast('Đã cập nhật thành công!');
             } else {
                 warrantyList.unshift(newItem);
-                showToast('Đã thêm mới thành công!');
             }
+
+            // Lưu vào localStorage trước cho mượt
             saveToStorage();
             switchTab('list');
+            showToast('Đã lưu thành công, đang đồng bộ lên Google Sheet...');
+
+            // Tự động đẩy đúng dòng vừa sửa/thêm này lên Google Sheet
+            try {
+                const payload = [{
+                    "id": String(newItem.id || ''),
+                    "Số phiếu BH": String(newItem.ticketNumber || ''),
+                    "Số serial": String(newItem.serialNumber || ''),
+                    "Tên khách hàng": String(newItem.customerName || ''),
+                    "Tên hàng hóa": String(newItem.itemName || ''),
+                    "Thương hiệu": String(newItem.brand || ''),
+                    "ngaynhan": String(parseDateToInput(newItem.dateReceived) || ''),
+                    "ngaytra": String(parseDateToInput(newItem.dateReturned) || ''),
+                    "ngaymua": String(parseDateToInput(newItem.purchaseDate) || ''),
+                    "Mô tả lỗi": String(newItem.errorDesc || ''),
+                    "Nội dung xử lý": String(newItem.repairProcess || ''),
+                    "Người sửa": String(newItem.tech || ''),
+                    "Phí anh Tú báo": Number(newItem.techFee || 0),
+                    "Phí báo khách": Number(newItem.customerFee || 0),
+                    "Linh kiện thay thế": String(newItem.spareParts || ''),
+                    "Tình trạng": String(newItem.status || '')
+                }];
+
+                await fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                showToast('Đã đồng bộ lên Google Sheet thành công!');
+            } catch (err) {
+                console.error(err);
+                showToast('Lưu máy thành công nhưng lỗi đồng bộ Sheet!', true);
+            }
         }
 
         function deleteRecord(id) {
