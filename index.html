@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v69</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v70</span>
                     </p>
                 </div>
             </div>
@@ -578,7 +578,7 @@
         }
 
         async function syncDataFromCloud(isSilent = false) {
-            if (!isSilent) showToast('Đang tải dữ liệu v69 từ Google Sheet...');
+            if (!isSilent) showToast('Đang tải dữ liệu v70 từ Google Sheet...');
             try {
                 const response = await fetch(googleScriptUrl);
                 if (!response.ok) throw new Error('Network response was not ok');
