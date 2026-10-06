@@ -102,14 +102,15 @@
                         <input type="text" id="search-input" oninput="renderTable()" placeholder="Tìm số phiếu, serial, khách..." class="custom-input pl-9 text-xs sm:text-sm">
                     </div>
                     <select id="filter-brand" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
-                        <option value="">Tất cả thương hiệu</option>
-                        <option value="ALPHATHETA/PIONEERDJ">ALPHATHETA/PIONEERDJ</option>
-                        <option value="B&C SPEAKERS">B&C SPEAKERS</option>
-                        <option value="SENNHEISER">SENNHEISER</option>
-                        <option value="MARANI">MARANI</option>
-                        <option value="ANTARI">ANTARI</option>
-                        <option value="P.AUDIO">P.AUDIO</option>
-                    </select>
+    <option value="">Tất cả thương hiệu</option>
+    <option value="ALPHATHETA/PIONEERDJ">ALPHATHETA/PIONEERDJ</option>
+    <option value="B&C SPEAKERS">B&C SPEAKERS</option>
+    <option value="SENNHEISER">SENNHEISER</option>
+    <option value="MARANI">MARANI</option>
+    <option value="ANTARI">ANTARI</option>
+    <option value="P.AUDIO">P.AUDIO</option>
+    <option value="PHONIC">PHONIC</option> <!-- Thêm dòng này -->
+</select>
                     <select id="filter-status" onchange="renderTable()" class="custom-input w-full sm:w-auto text-xs sm:text-sm">
                         <option value="">Tất cả tình trạng</option>
                         <option value="mới tiếp nhận">Mới tiếp nhận</option>
@@ -237,14 +238,14 @@
                                     <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-chevron-down text-xs"></i></span>
                                 </div>
                                 <div id="brandDropdownMenu" class="dropdown-menu">
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('ALPHATHETA/PIONEERDJ')">ALPHATHETA/PIONEERDJ</div>
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('B&C SPEAKERS')">B&C SPEAKERS</div>
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('SENNHEISER')">SENNHEISER</div>
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('MARANI')">MARANI</div>
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('ANTARI')">ANTARI</div>
-                                    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('PHONIC')">PHONIC</div>
-                                     <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium" onclick="selectBrand('P.AUDIO')">P.AUDIO</div>
-                                </div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('ALPHATHETA/PIONEERDJ')">ALPHATHETA/PIONEERDJ</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('B&C SPEAKERS')">B&C SPEAKERS</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('SENNHEISER')">SENNHEISER</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('MARANI')">MARANI</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('ANTARI')">ANTARI</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium border-b border-slate-100" onclick="selectBrand('P.AUDIO')">P.AUDIO</div>
+    <div class="p-2 hover:bg-slate-100 cursor-pointer text-xs font-medium" onclick="selectBrand('PHONIC')">PHONIC</div> <!-- Thêm dòng này vào cuối dropdown -->
+</div>
                             </div>
 
                             <div class="relative" id="dropdown-tech-container">
