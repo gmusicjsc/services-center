@@ -974,30 +974,131 @@
                 return;
             }
 
-            const wb = XLSX.utils.book_new();
-            const detailData = filtered.map((i, idx) => ({
-                "STT": idx + 1,
-                "Số phiếu BH": i.ticketNumber,
-                "Số serial": i.serialNumber,
-                "Tên khách hàng": i.customerName,
-                "Tên hàng hóa": i.itemName,
-                "Thương hiệu": i.brand,
-                "Ngày nhận thiết bị": parseDateToDisplay(i.dateReceived),
-                "Ngày trả thiết bị": parseDateToDisplay(i.dateReturned),
-                "Ngày mua hàng": parseDateToDisplay(i.purchaseDate),
-                "Mô tả lỗi": i.errorDesc,
-                "Nội dung xử lý": i.repairProcess,
-                "Người sửa": i.tech,
-                "Phí anh Tú báo": i.techFee,
-                "Phí báo khách": i.customerFee,
-                "Linh kiện thay thế": i.spareParts,
-                "Tình trạng": i.status
-            }));
-            const wsDetail = XLSX.utils.json_to_sheet(detailData);
-            XLSX.utils.book_append_sheet(wb, wsDetail, `BaoCao_Thang_${mm}_${yyyy}`);
+            // Tính toán số liệu tổng quan
+            const totalCases = filtered.length;
+            const doneList = filtered.filter(i => {
+                const st = String(i.status || '').toLowerCase();
+                return st.includes('đã trả khách') || st.includes('đã sửa xong') || st.includes('hoàn trả') || st.includes('không sửa');
+            });
+            const doneCases = doneList.length;
+            const pendingCases = totalCases - doneCases;
 
-            XLSX.writeFile(wb, `BaoCao_BaoHanh_Thang_${mm}_${yyyy}.xlsx`);
-            showToast(`Đã xuất báo cáo tháng ${mm}/${yyyy} thành công!`);
+            let warrantyCount = 0;
+            let repairCount = 0;
+            doneList.forEach(i => {
+                const fee = Number(i.customerFee || 0);
+                if (fee > 0) repairCount++;
+                else warrantyCount++;
+            });
+
+            const totalRevenue = filtered.reduce((s, i) => {
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    return s + (Number(i.customerFee) || 0);
+                }
+                return s;
+            }, 0);
+
+            // Gom nhóm theo Thợ (Tech)
+            const techMap = {};
+            filtered.forEach(i => {
+                const tName = i.tech || 'Anh Tú';
+                if (!techMap[tName]) techMap[tName] = { count: 0, techFee: 0 };
+                techMap[tName].count++;
+                techMap[tName].techFee += Number(i.techFee) || 0;
+            });
+
+            // Gom nhóm theo Thương hiệu (Brand)
+            const brandMap = {};
+            filtered.forEach(i => {
+                const bName = i.brand || 'Khác';
+                if (!brandMap[bName]) brandMap[bName] = { count: 0, rev: 0 };
+                brandMap[bName].count++;
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    brandMap[bName].rev += Number(i.customerFee) || 0;
+                }
+            });
+
+            // Gom nhóm theo Khách hàng
+            const customerMap = {};
+            filtered.forEach(i => {
+                const cName = i.customerName || 'Khách lẻ';
+                if (!customerMap[cName]) customerMap[cName] = { count: 0, rev: 0 };
+                customerMap[cName].count++;
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    customerMap[cName].rev += Number(i.customerFee) || 0;
+                }
+            });
+
+            // Gom nhóm theo Hàng hóa
+            const itemMap = {};
+            filtered.forEach(i => {
+                const itName = i.itemName || 'Thiết bị';
+                if (!itemMap[itName]) itemMap[itName] = { count: 0, rev: 0 };
+                itemMap[itName].count++;
+                const st = String(i.status || '').toLowerCase();
+                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                    itemMap[itName].rev += Number(i.customerFee) || 0;
+                }
+            });
+
+            // Xây dựng mảng dữ liệu xuất ra Excel theo dạng bảng tổng hợp gọn gàng
+            let reportRows = [
+                { "A": `BÁO CÁO TỔNG HỢP THÁNG ${mm}/${yyyy} - G.MUSIC`, "B": "", "C": "" },
+                { "A": "", "B": "", "C": "" },
+                { "A": "--- TỔNG QUAN CHUNG ---", "B": "", "C": "" },
+                { "A": "Tổng số ca bảo hành", "B": totalCases, "C": "" },
+                { "A": "Đã trả khách (Bảo hành / Sửa chữa)", "B": `${doneCases} (BH: ${warrantyCount} / Sửa: ${repairCount})`, "C": "" },
+                { "A": "Đang xử lý / Mới", "B": pendingCases, "C": "" },
+                { "A": "Tổng doanh thu", "B": totalRevenue, "C": "VNĐ" },
+                { "A": "", "B": "", "C": "" },
+                
+                { "A": "--- THỐNG KÊ THEO KỸ THUẬT VIÊN (THỢ) ---", "B": "", "C": "" },
+                { "A": "Tên thợ", "B": "Số ca nhận", "C": "Tổng phí thợ báo" }
+            ];
+
+            for (let [tName, data] of Object.entries(techMap)) {
+                reportRows.push({ "A": tName, "B": data.count, "C": data.techFee });
+            }
+
+            reportRows.push(
+                { "A": "", "B": "", "C": "" },
+                { "A": "--- THỐNG KÊ THEO THƯƠNG HIỆU ---", "B": "", "C": "" },
+                { "A": "Thương hiệu", "B": "Số ca", "C": "Doanh thu" }
+            );
+
+            for (let [bName, data] of Object.entries(brandMap)) {
+                reportRows.push({ "A": bName, "B": data.count, "C": data.rev });
+            }
+
+            reportRows.push(
+                { "A": "", "B": "", "C": "" },
+                { "A": "--- THỐNG KÊ THEO KHÁCH HÀNG ---", "B": "", "C": "" },
+                { "A": "Tên khách hàng", "B": "Số ca", "C": "Doanh thu" }
+            );
+
+            for (let [cName, data] of Object.entries(customerMap)) {
+                reportRows.push({ "A": cName, "B": data.count, "C": data.rev });
+            }
+
+            reportRows.push(
+                { "A": "", "B": "", "C": "" },
+                { "A": "--- THỐNG KÊ THEO HÀNG HÓA (THIẾT BỊ) ---", "B": "", "C": "" },
+                { "A": "Tên hàng hóa", "B": "Số ca", "C": "Doanh thu" }
+            );
+
+            for (let [itName, data] of Object.entries(itemMap)) {
+                reportRows.push({ "A": itName, "B": data.count, "C": data.rev });
+            }
+
+            const ws = XLSX.utils.json_to_sheet(reportRows, { skipHeader: true });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `TongHop_Thang_${mm}_${yyyy}`);
+
+            XLSX.writeFile(wb, `BaoCao_TongHop_Thang_${mm}_${yyyy}.xlsx`);
+            showToast(`Đã xuất báo cáo tổng hợp tháng ${mm}/${yyyy} thành công!`);
         }
 
         function handleFileUpload(e) {
