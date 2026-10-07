@@ -95,7 +95,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v74</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v75</span>
                     </p>
                 </div>
             </div>
@@ -524,11 +524,11 @@
         let currentSortCol = 'ticketNumber';
         let currentSortAsc = false;
         
-        let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
+        let googleScriptUrl = "https://script.google.com/macros/s/AKfycbSTYPcQYfnrTBV4crGAc36w0CMOYZH9857wTWPDqVyriAyGxEE6TepdwFV9xUg29sUWg/exec";
 
-        if (!localStorage.getItem('gmusic_cleared_v74_plain_sync')) {
+        if (!localStorage.getItem('gmusic_cleared_v75_plain_sync')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v74_plain_sync', 'true');
+            localStorage.setItem('gmusic_cleared_v75_plain_sync', 'true');
         }
 
         function cleanAndFormatDate(val) {
@@ -610,7 +610,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v74', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v75', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
@@ -640,7 +640,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v74', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v75', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
@@ -728,7 +728,7 @@
             document.getElementById('status').value = item.status || 'đang xử lý';
         }
 
-        // TỰ ĐỘNG LƯU VÀ ĐỒNG BỘ LÊN SHEET KHI BẤM NÚT LƯU TRÊN FORM
+        // TỰ ĐỘNG LƯU VÀ ĐỒNG BỘ ĐÚNG MỘT DÒNG LÊN SHEET (BẢO VỆ 100% CÁC DÒNG KHÁC)
         async function saveWarrantyItem(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
@@ -977,7 +977,6 @@
 
         // 2. In báo cáo tổng hợp toàn bộ
         function printTotalReport() {
-            // Tạm thời bỏ chọn tháng để updateStats() hiển thị toàn bộ số liệu tổng hợp
             const monthInput = document.getElementById('export-month-input');
             const oldVal = monthInput.value;
             monthInput.value = '';
@@ -988,7 +987,6 @@
             
             window.print();
 
-            // Khôi phục lại tháng cũ trên giao diện web
             monthInput.value = oldVal;
             updateStats();
         }
