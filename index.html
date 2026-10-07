@@ -55,13 +55,19 @@
         .sortable-th { cursor: pointer; user-select: none; transition: background 0.2s; }
         .sortable-th:hover { background-color: #f1f5f9; color: #7c3aed; }
 
-        /* Tối ưu khi in / xuất PDF trang Báo cáo */
+        /* Tối ưu khi in / xuất PDF trang Báo cáo (Bung full, không scroll) */
         @media print {
             body { background-color: white !important; }
             header, nav, button, input[type="month"], #search-input, select, .no-print { display: none !important; }
             section { display: none !important; }
             #tab-report { display: block !important; padding: 0 !important; margin: 0 !important; }
             .bg-white { border: 1px solid #e2e8f0 !important; box-shadow: none !important; break-inside: avoid; }
+            
+            /* Xóa bỏ thanh cuộn, hiện thị đầy đủ nội dung bảng khi xuất PDF */
+            .overflow-x-auto, div[class*="max-h-"] {
+                max-height: none !important;
+                overflow: visible !important;
+            }
         }
     </style>
 </head>
@@ -78,7 +84,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v71</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v72</span>
                     </p>
                 </div>
             </div>
@@ -374,7 +380,7 @@
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-chart-column text-purple-600"></i> Thống kê theo Tháng (Số ca & Doanh thu)</h3>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <input type="month" id="export-month-input" class="custom-input py-1.5 text-xs w-auto">
+                        <input type="month" id="export-month-input" onchange="updateStats()" class="custom-input py-1.5 text-xs w-auto">
                         <button onclick="printMonthlyReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition whitespace-nowrap">
                             <i class="fa-solid fa-file-pdf"></i> Xuất PDF / In Báo Cáo
                         </button>
@@ -494,9 +500,9 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        if (!localStorage.getItem('gmusic_cleared_v71_plain_sync')) {
+        if (!localStorage.getItem('gmusic_cleared_v72_plain_sync')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v71_plain_sync', 'true');
+            localStorage.setItem('gmusic_cleared_v72_plain_sync', 'true');
         }
 
         function cleanAndFormatDate(val) {
@@ -578,7 +584,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v71', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v72', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
@@ -608,7 +614,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v71', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v72', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
@@ -998,9 +1004,19 @@
         }
 
         function updateStats() {
-            const total = warrantyList.length;
+            const monthInputVal = document.getElementById('export-month-input') ? document.getElementById('export-month-input').value : '';
+            
+            let filteredList = warrantyList;
+            if (monthInputVal) {
+                filteredList = warrantyList.filter(i => {
+                    let raw = cleanAndFormatDate(i.dateReceived);
+                    return raw.startsWith(monthInputVal);
+                });
+            }
 
-            const doneList = warrantyList.filter(i => {
+            const total = filteredList.length;
+
+            const doneList = filteredList.filter(i => {
                 const st = String(i.status || '').toLowerCase();
                 return st.includes('đã trả khách') || st.includes('đã sửa xong') || st.includes('hoàn trả') || st.includes('không sửa');
             });
@@ -1016,7 +1032,7 @@
 
             const pending = total - done;
 
-            const totalRev = warrantyList.reduce((s, i) => {
+            const totalRev = filteredList.reduce((s, i) => {
                 const st = String(i.status || '').toLowerCase();
                 if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
                     return s + (Number(i.customerFee) || 0);
@@ -1031,6 +1047,7 @@
             document.getElementById('rep-pending-cases').innerText = pending;
             document.getElementById('rep-total-revenue').innerText = totalRev.toLocaleString('vi-VN') + ' đ';
 
+            // 1. Thống kê theo Tháng (danh sách các tháng từ trước đến nay)
             const monthMap = {};
             warrantyList.forEach(i => {
                 let raw = cleanAndFormatDate(i.dateReceived);
@@ -1060,8 +1077,9 @@
             });
             document.getElementById('report-month-body').innerHTML = monthHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
+            // 2. Thống kê theo Thợ (dựa theo tháng đã chọn)
             const techMap = {};
-            warrantyList.forEach(i => {
+            filteredList.forEach(i => {
                 const tName = i.tech || 'Anh Tú';
                 if (!techMap[tName]) techMap[tName] = { count: 0, techFee: 0 };
                 techMap[tName].count++;
@@ -1077,10 +1095,11 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-tech-body').innerHTML = techHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+            document.getElementById('report-tech-body').innerHTML = techHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
 
+            // 3. Thống kê theo Thương hiệu (dựa theo tháng đã chọn)
             const brandMap = {};
-            warrantyList.forEach(i => {
+            filteredList.forEach(i => {
                 const bName = i.brand || 'Khác';
                 if (!brandMap[bName]) brandMap[bName] = { count: 0, rev: 0 };
                 brandMap[bName].count++;
@@ -1099,10 +1118,11 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+            document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
 
+            // 4. Thống kê theo Khách hàng (dựa theo tháng đã chọn)
             const customerMap = {};
-            warrantyList.forEach(i => {
+            filteredList.forEach(i => {
                 const cName = i.customerName || 'Khách lẻ';
                 if (!customerMap[cName]) customerMap[cName] = { count: 0, rev: 0 };
                 customerMap[cName].count++;
@@ -1121,10 +1141,11 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+            document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
 
+            // 5. Thống kê theo Thiết bị (dựa theo tháng đã chọn)
             const itemMap = {};
-            warrantyList.forEach(i => {
+            filteredList.forEach(i => {
                 const itName = i.itemName || 'Thiết bị';
                 if (!itemMap[itName]) itemMap[itName] = { count: 0, rev: 0 };
                 itemMap[itName].count++;
@@ -1143,7 +1164,7 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-item-body').innerHTML = itemHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+            document.getElementById('report-item-body').innerHTML = itemHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
         }
     </script>
 </body>
