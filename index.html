@@ -55,15 +55,26 @@
         .sortable-th { cursor: pointer; user-select: none; transition: background 0.2s; }
         .sortable-th:hover { background-color: #f1f5f9; color: #7c3aed; }
 
-        /* Tối ưu khi in / xuất PDF trang Báo cáo (Bung full, không scroll) */
+        .print-header-logo { display: none; }
+
+        /* Tối ưu khi in / xuất PDF trang Báo cáo */
         @media print {
             body { background-color: white !important; }
             header, nav, button, input[type="month"], #search-input, select, .no-print { display: none !important; }
             section { display: none !important; }
             #tab-report { display: block !important; padding: 0 !important; margin: 0 !important; }
+            
+            .print-header-logo {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 2px solid #7c3aed;
+                padding-bottom: 12px;
+                margin-bottom: 20px;
+            }
+
             .bg-white { border: 1px solid #e2e8f0 !important; box-shadow: none !important; break-inside: avoid; }
             
-            /* Xóa bỏ thanh cuộn, hiện thị đầy đủ nội dung bảng khi xuất PDF */
             .overflow-x-auto, div[class*="max-h-"] {
                 max-height: none !important;
                 overflow: visible !important;
@@ -84,7 +95,7 @@
                     <h1 class="text-xs sm:text-base font-bold text-slate-800 leading-tight truncate">Quản Lý Bảo Hành & Sửa Chữa</h1>
                     <p class="text-[10px] sm:text-xs text-slate-500 truncate flex items-center gap-1.5">
                         <span>G.Music & Technical Center</span>
-                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v72</span>
+                        <span class="bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded font-mono font-semibold">v74</span>
                     </p>
                 </div>
             </div>
@@ -336,6 +347,18 @@
 
         <!-- TAB 4: BÁO CÁO -->
         <section id="tab-report" class="hidden space-y-6">
+            <!-- LOGO HIỂN THỊ KHI IN / XUẤT PDF -->
+            <div class="print-header-logo">
+                <div class="flex items-center space-x-3">
+                    <img src="logo-G.Music-2026.png" alt="G.Music Logo" style="height: 40px; width: auto;">
+                    <div>
+                        <h2 style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0;" id="print-title-text">Báo Cáo Quản Lý Bảo Hành & Sửa Chữa</h2>
+                        <p style="font-size: 11px; color: #64748b; margin: 0;">G.Music & Technical Center</p>
+                    </div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #64748b;" id="print-date-label"></div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
@@ -375,20 +398,23 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ & Xuất báo cáo / In PDF -->
+            <!-- Biểu đồ & Các nút Xuất PDF / In Báo Cáo -->
             <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-chart-column text-purple-600"></i> Thống kê theo Tháng (Số ca & Doanh thu)</h3>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <input type="month" id="export-month-input" onchange="updateStats()" class="custom-input py-1.5 text-xs w-auto">
                         <button onclick="printMonthlyReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition whitespace-nowrap">
-                            <i class="fa-solid fa-file-pdf"></i> Xuất PDF / In Báo Cáo
+                            <i class="fa-solid fa-file-pdf"></i> In Báo Cáo Tháng
+                        </button>
+                        <button onclick="printTotalReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition whitespace-nowrap">
+                            <i class="fa-solid fa-print"></i> In Báo Cáo Tổng Hợp
                         </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto max-h-72">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50">
+                        <thead class="bg-slate-50 sticky top-0">
                             <tr class="text-slate-600 border-b border-slate-200">
                                 <th class="p-2.5">Tháng</th>
                                 <th class="p-2.5 text-center">Số lượng ca</th>
@@ -500,9 +526,9 @@
         
         let googleScriptUrl = "https://script.google.com/macros/s/AKfycbzyOruALsprkYPPnqRIwrYNOsTMHCO6Xz6NJVNqa3TWtIVZEZ43Fsbl_adYJSjbUrUx2w/exec";
 
-        if (!localStorage.getItem('gmusic_cleared_v72_plain_sync')) {
+        if (!localStorage.getItem('gmusic_cleared_v74_plain_sync')) {
             localStorage.clear();
-            localStorage.setItem('gmusic_cleared_v72_plain_sync', 'true');
+            localStorage.setItem('gmusic_cleared_v74_plain_sync', 'true');
         }
 
         function cleanAndFormatDate(val) {
@@ -584,7 +610,7 @@
         });
 
         function saveToStorage() {
-            localStorage.setItem('warranty_records_gmusic_v72', JSON.stringify(warrantyList));
+            localStorage.setItem('warranty_records_gmusic_v74', JSON.stringify(warrantyList));
             renderTable();
             updateStats();
         }
@@ -614,7 +640,7 @@
                         spareParts: String(i['Linh kiện thay thế'] || i['spareParts'] || '').trim(),
                         status: String(i['Tình trạng'] || i['status'] || 'đang xử lý').trim().toLowerCase()
                     }));
-                    localStorage.setItem('warranty_records_gmusic_v72', JSON.stringify(warrantyList));
+                    localStorage.setItem('warranty_records_gmusic_v74', JSON.stringify(warrantyList));
                     renderTable();
                     updateStats();
                     if (!isSilent) showToast('Tải dữ liệu thành công!');
@@ -936,14 +962,35 @@
             showToast('Xuất Excel thành công!');
         }
 
-        // HÀM IN BÁO CÁO THÁNG RA PDF
+        // 1. In báo cáo theo tháng
         function printMonthlyReport() {
             const monthVal = document.getElementById('export-month-input').value;
             if (!monthVal) {
                 showToast('Vui lòng chọn tháng cần in báo cáo!', true);
                 return;
             }
+            const [yyyy, mm] = monthVal.split('-');
+            document.getElementById('print-title-text').innerText = `Báo Cáo Quản Lý Bảo Hành & Sửa Chữa - Tháng ${mm}/${yyyy}`;
+            document.getElementById('print-date-label').innerText = `Tháng: ${mm}/${yyyy} (Ngày in: ${new Date().toLocaleDateString('vi-VN')})`;
             window.print();
+        }
+
+        // 2. In báo cáo tổng hợp toàn bộ
+        function printTotalReport() {
+            // Tạm thời bỏ chọn tháng để updateStats() hiển thị toàn bộ số liệu tổng hợp
+            const monthInput = document.getElementById('export-month-input');
+            const oldVal = monthInput.value;
+            monthInput.value = '';
+            updateStats();
+
+            document.getElementById('print-title-text').innerText = `Báo Cáo Tổng Hợp Toàn Bộ - G.Music`;
+            document.getElementById('print-date-label').innerText = `Tổng hợp toàn bộ (Ngày in: ${new Date().toLocaleDateString('vi-VN')})`;
+            
+            window.print();
+
+            // Khôi phục lại tháng cũ trên giao diện web
+            monthInput.value = oldVal;
+            updateStats();
         }
 
         function handleFileUpload(e) {
@@ -1047,7 +1094,7 @@
             document.getElementById('rep-pending-cases').innerText = pending;
             document.getElementById('rep-total-revenue').innerText = totalRev.toLocaleString('vi-VN') + ' đ';
 
-            // 1. Thống kê theo Tháng (danh sách các tháng từ trước đến nay)
+            // 1. Thống kê theo Tháng
             const monthMap = {};
             warrantyList.forEach(i => {
                 let raw = cleanAndFormatDate(i.dateReceived);
@@ -1077,7 +1124,7 @@
             });
             document.getElementById('report-month-body').innerHTML = monthHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 2. Thống kê theo Thợ (dựa theo tháng đã chọn)
+            // 2. Thống kê theo Thợ
             const techMap = {};
             filteredList.forEach(i => {
                 const tName = i.tech || 'Anh Tú';
@@ -1095,9 +1142,9 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-tech-body').innerHTML = techHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
+            document.getElementById('report-tech-body').innerHTML = techHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 3. Thống kê theo Thương hiệu (dựa theo tháng đã chọn)
+            // 3. Thống kê theo Thương hiệu
             const brandMap = {};
             filteredList.forEach(i => {
                 const bName = i.brand || 'Khác';
@@ -1118,9 +1165,9 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
+            document.getElementById('report-brand-body').innerHTML = brandHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 4. Thống kê theo Khách hàng (dựa theo tháng đã chọn)
+            // 4. Thống kê theo Khách hàng
             const customerMap = {};
             filteredList.forEach(i => {
                 const cName = i.customerName || 'Khách lẻ';
@@ -1141,9 +1188,9 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
+            document.getElementById('report-customer-body').innerHTML = customerHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 5. Thống kê theo Thiết bị (dựa theo tháng đã chọn)
+            // 5. Thống kê theo Thiết bị
             const itemMap = {};
             filteredList.forEach(i => {
                 const itName = i.itemName || 'Thiết bị';
@@ -1164,7 +1211,7 @@
                     </tr>
                 `;
             }
-            document.getElementById('report-item-body').innerHTML = itemHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu trong tháng</td></tr>`;
+            document.getElementById('report-item-body').innerHTML = itemHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
         }
     </script>
 </body>
