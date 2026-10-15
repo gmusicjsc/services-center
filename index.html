@@ -1079,7 +1079,7 @@
 
             const totalRev = filteredList.reduce((s, i) => {
                 const st = String(i.status || '').toLowerCase();
-                if (st.includes('đã trả khách') || st.includes('đã sửa xong')) {
+                if (st.includes('đã trả khách') ) {
                     return s + (Number(i.customerFee) || 0);
                 }
                 return s;
