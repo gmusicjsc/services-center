@@ -1122,14 +1122,16 @@
             });
             document.getElementById('report-month-body').innerHTML = monthHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 2. Thống kê chỉ riêng kỹ thuật viên: Anh Tú
+            // 2. Thống kê kỹ thuật viên: Anh Tú (Chỉ tính các ca đã trả khách / đã sửa xong)
             let tuCount = 0;
             let tuFee = 0;
 
             filteredList.forEach(i => {
                 const tName = String(i.tech || '').trim();
-                // Kiểm tra đúng tên Anh Tú (không phân biệt hoa thường)
-                if (tName.toLowerCase() === 'anh tú' || tName.toLowerCase() === 'anhtu') {
+                const st = String(i.status || '').toLowerCase();
+                const isDone = st.includes('đã trả khách') || st.includes('đã sửa xong');
+
+                if ((tName.toLowerCase() === 'anh tú' || tName.toLowerCase() === 'anhtu') && isDone) {
                     tuCount++;
                     tuFee += Number(i.techFee || 0);
                 }
@@ -1143,7 +1145,7 @@
                 </tr>
             `;
             document.getElementById('report-tech-body').innerHTML = techHtml;
-
+            
             // 3. Thống kê theo Thương hiệu
             const brandMap = {};
             filteredList.forEach(i => {
