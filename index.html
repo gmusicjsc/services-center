@@ -1122,25 +1122,27 @@
             });
             document.getElementById('report-month-body').innerHTML = monthHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
 
-            // 2. Thống kê theo Thợ
-            const techMap = {};
+            // 2. Thống kê chỉ riêng kỹ thuật viên: Anh Tú
+            let tuCount = 0;
+            let tuFee = 0;
+
             filteredList.forEach(i => {
-                const tName = i.tech || 'Anh Tú';
-                if (!techMap[tName]) techMap[tName] = { count: 0, techFee: 0 };
-                techMap[tName].count++;
-                techMap[tName].techFee += Number(i.techFee) || 0;
+                const tName = String(i.tech || '').trim();
+                // Kiểm tra đúng tên Anh Tú (không phân biệt hoa thường)
+                if (tName.toLowerCase() === 'anh tú' || tName.toLowerCase() === 'anhtu') {
+                    tuCount++;
+                    tuFee += Number(i.techFee || 0);
+                }
             });
-            let techHtml = '';
-            for (let [tName, data] of Object.entries(techMap)) {
-                techHtml += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2.5 font-medium text-slate-800">${tName}</td>
-                        <td class="p-2.5 text-center font-bold text-purple-600">${data.count}</td>
-                        <td class="p-2.5 text-right font-semibold text-slate-700">${data.techFee.toLocaleString('vi-VN')} đ</td>
-                    </tr>
-                `;
-            }
-            document.getElementById('report-tech-body').innerHTML = techHtml || `<tr><td colspan="3" class="p-4 text-center text-slate-400">Chưa có dữ liệu</td></tr>`;
+
+            let techHtml = `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2.5 font-medium text-slate-800">Anh Tú</td>
+                    <td class="p-2.5 text-center font-bold text-purple-600">${tuCount}</td>
+                    <td class="p-2.5 text-right font-semibold text-slate-700">${tuFee.toLocaleString('vi-VN')} đ</td>
+                </tr>
+            `;
+            document.getElementById('report-tech-body').innerHTML = techHtml;
 
             // 3. Thống kê theo Thương hiệu
             const brandMap = {};
